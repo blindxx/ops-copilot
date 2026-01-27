@@ -265,11 +265,13 @@
     <header>
       <h1>🛠️ Ops Copilot</h1>
       <p>Network Troubleshooting Assistant - Optimized for Cat9300/9300X, Nexus9K & Catalyst 9800</p>
+      <p style="font-size: 0.9em; margin-top: 10px; opacity: 0.9;">Need help? See the Guide tab →</p>
     </header>
     
     <div class="tabs">
       <div class="tab active" id="tabIncident">🔧 Incident Analysis</div>
       <div class="tab" id="tabConfig">⚙️ Config Review</div>
+      <div class="tab" id="tabGuide">📖 Guide</div>
     </div>
     
     <!-- INCIDENT PANEL -->
@@ -420,6 +422,93 @@
         <button class="btn-success" id="cfgCopyOut">📋 Copy Output</button>
         <button class="btn-secondary" id="cfgDownload">💾 Download</button>
         <button class="btn-danger" id="cfgClear">🗑️ Clear All</button>
+      </div>
+    </div>
+    
+    <!-- GUIDE PANEL -->
+    <div class="panel" id="panelGuide">
+      <div style="max-width: 900px; margin: 0 auto; line-height: 1.6;">
+        <h2 style="margin-bottom: 20px; color: #667eea;">📖 Ops Copilot Guide</h2>
+        
+        <p style="font-size: 1.1em; margin-bottom: 20px;">A lightweight, offline network troubleshooting assistant that generates smart diagnostic commands and AI-ready prompts for Cisco environments.</p>
+        
+        <h3 style="margin-top: 30px; margin-bottom: 15px; color: #495057;">Quick Start</h3>
+        <ol style="margin-left: 20px; margin-bottom: 20px;">
+          <li><strong>Online</strong>: You're already here! Just use the tabs above.</li>
+          <li><strong>Offline</strong>: Download the files from GitHub and open <code>index.html</code> in any browser</li>
+        </ol>
+        <p style="margin-bottom: 20px;">No installation required. Works 100% offline.</p>
+        
+        <h3 style="margin-top: 30px; margin-bottom: 15px; color: #495057;">What It Does</h3>
+        
+        <p style="margin-bottom: 10px;"><strong>Incident Analysis:</strong></p>
+        <ul style="margin-left: 20px; margin-bottom: 20px;">
+          <li>Enter symptoms in plain language (e.g., "WiFi keeps dropping", "slow internet")</li>
+          <li>Get intelligent command suggestions based on keywords and device type</li>
+          <li>Auto-generates evidence collection worksheets</li>
+          <li>Performs basic offline analysis of command outputs</li>
+          <li>Creates structured AI prompts for deeper troubleshooting</li>
+        </ul>
+        
+        <p style="margin-bottom: 10px;"><strong>Config Review:</strong></p>
+        <ul style="margin-left: 20px; margin-bottom: 20px;">
+          <li>Paste sanitized configs</li>
+          <li>Generate AI-ready prompts for security and best practice analysis</li>
+        </ul>
+        
+        <h3 style="margin-top: 30px; margin-bottom: 15px; color: #495057;">Key Features</h3>
+        <ul style="margin-left: 20px; margin-bottom: 20px;">
+          <li>✅ <strong>Smart Detection</strong> - Understands natural language ("flapping", "can't connect", "slow")</li>
+          <li>✅ <strong>Platform-Aware</strong> - Adapts to Cat9300/9300X, Nexus9K, or Cat9800 WLC</li>
+          <li>✅ <strong>Interface Parsing</strong> - Handles <code>gi1/0/24</code>, <code>te 2/0/4</code>, <code>po-2</code> formats</li>
+          <li>✅ <strong>Offline Analysis</strong> - Basic diagnostics without external APIs</li>
+          <li>✅ <strong>Auto-Redaction</strong> - Sanitizes IPs and emails</li>
+          <li>✅ <strong>100% Offline</strong> - No data leaves your browser</li>
+        </ul>
+        
+        <h3 style="margin-top: 30px; margin-bottom: 15px; color: #495057;">Usage Example</h3>
+        <div style="background: #f8f9fa; padding: 20px; border-radius: 6px; margin-bottom: 20px; font-family: 'Consolas', 'Monaco', monospace; font-size: 0.9em;">
+          <strong>Input:</strong><br>
+          Type: Wireless Issues<br>
+          Symptoms: "Users in conference room can't connect to WiFi, authentication errors"<br>
+          Device: Catalyst 9800 WLC<br><br>
+          
+          <strong>Output:</strong><br>
+          # Auto-suggested commands<br>
+          show wlan summary<br>
+          show wireless client summary<br>
+          show ap summary<br>
+          show wireless client mac &lt;MAC&gt; detail<br>
+          show radius server-group detail<br>
+          # ... and more
+        </div>
+        <p style="margin-bottom: 20px;">The tool detects "authentication" and automatically includes auth-specific commands.</p>
+        
+        <h3 style="margin-top: 30px; margin-bottom: 15px; color: #495057;">Supported Platforms</h3>
+        <ul style="margin-left: 20px; margin-bottom: 20px;">
+          <li><strong>Access</strong>: Catalyst 9300, 9300X (IOS-XE)</li>
+          <li><strong>Core</strong>: Nexus 9000 Series (NX-OS)</li>
+          <li><strong>Wireless</strong>: Catalyst 9800 WLC</li>
+          <li><strong>APs</strong>: Catalyst 9100 Series</li>
+        </ul>
+        
+        <h3 style="margin-top: 30px; margin-bottom: 15px; color: #495057;">Privacy & Security</h3>
+        <ul style="margin-left: 20px; margin-bottom: 20px;">
+          <li>100% client-side JavaScript - no server communication</li>
+          <li>Safe for sanitized/redacted data</li>
+          <li>Auto-redaction available for IPs and emails</li>
+          <li>No data storage or tracking</li>
+        </ul>
+        
+        <h3 style="margin-top: 30px; margin-bottom: 15px; color: #495057;">Tips</h3>
+        <ul style="margin-left: 20px; margin-bottom: 20px;">
+          <li><strong>Auto-update</strong>: Enable "Auto-update suggestions" to see recommendations refresh as you type</li>
+          <li><strong>Multiple symptoms</strong>: Tool detects multiple issue types and combines relevant commands</li>
+          <li><strong>Any interface format</strong>: <code>gi1/0/24</code>, <code>g 1/0/24</code>, <code>GigabitEthernet1/0/24</code> all work</li>
+        </ul>
+        
+        <hr style="margin: 40px 0; border: none; border-top: 1px solid #e9ecef;">
+        <p style="text-align: center; color: #6c757d;"><strong>Made for Network Operations Teams</strong></p>
       </div>
     </div>
   </div>

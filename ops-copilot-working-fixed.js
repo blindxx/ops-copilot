@@ -76,18 +76,27 @@ if (DEBUG) {
 document.addEventListener("DOMContentLoaded", () => {
   const tabIncident = document.getElementById('tabIncident');
   const tabConfig   = document.getElementById('tabConfig');
+  const tabGuide    = document.getElementById('tabGuide');
   const panelIncident = document.getElementById('panelIncident');
   const panelConfig   = document.getElementById('panelConfig');
+  const panelGuide    = document.getElementById('panelGuide');
  
   function activate(which){
     const isIncident = (which === 'incident');
+    const isConfig = (which === 'config');
+    const isGuide = (which === 'guide');
+    
     tabIncident.classList.toggle('active', isIncident);
-    tabConfig.classList.toggle('active', !isIncident);
+    tabConfig.classList.toggle('active', isConfig);
+    tabGuide.classList.toggle('active', isGuide);
+    
     panelIncident.style.display = isIncident ? 'block' : 'none';
-    panelConfig.style.display   = isIncident ? 'none' : 'block';
+    panelConfig.style.display   = isConfig ? 'block' : 'none';
+    panelGuide.style.display    = isGuide ? 'block' : 'none';
   }
   tabIncident.addEventListener('click', () => activate('incident'));
   tabConfig.addEventListener('click', () => activate('config'));
+  tabGuide.addEventListener('click', () => activate('guide'));
   });
  
 // ==========================================================
