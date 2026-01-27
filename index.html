@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ops Copilot - Network Troubleshooting Assistant</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+      color: #333;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+      overflow: hidden;
+    }
+    
+    header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 30px;
+      text-align: center;
+    }
+    
+    header h1 {
+      font-size: 2.5em;
+      margin-bottom: 10px;
+      font-weight: 700;
+    }
+    
+    header p {
+      font-size: 1.1em;
+      opacity: 0.95;
+    }
+    
+    .tabs {
+      display: flex;
+      background: #f8f9fa;
+      border-bottom: 2px solid #e9ecef;
+    }
+    
+    .tab {
+      flex: 1;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 1.1em;
+      transition: all 0.3s ease;
+      border-bottom: 3px solid transparent;
+    }
+    
+    .tab:hover {
+      background: #e9ecef;
+    }
+    
+    .tab.active {
+      background: white;
+      border-bottom: 3px solid #667eea;
+      color: #667eea;
+    }
+    
+    .panel {
+      padding: 30px;
+      display: none;
+    }
+    
+    .panel.active {
+      display: block;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #495057;
+      font-size: 0.95em;
+    }
+    
+    input[type="text"],
+    textarea,
+    select {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e9ecef;
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 0.95em;
+      transition: border-color 0.3s ease;
+    }
+    
+    input[type="text"]:focus,
+    textarea:focus,
+    select:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+    
+    textarea {
+      resize: vertical;
+      min-height: 120px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    }
+    
+    .button-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 20px 0;
+    }
+    
+    button {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.95em;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      flex: 1;
+      min-width: 140px;
+    }
+    
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    
+    .btn-primary {
+      background: #667eea;
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: #5568d3;
+    }
+    
+    .btn-secondary {
+      background: #6c757d;
+      color: white;
+    }
+    
+    .btn-secondary:hover {
+      background: #5a6268;
+    }
+    
+    .btn-success {
+      background: #28a745;
+      color: white;
+    }
+    
+    .btn-success:hover {
+      background: #218838;
+    }
+    
+    .btn-danger {
+      background: #dc3545;
+      color: white;
+    }
+    
+    .btn-danger:hover {
+      background: #c82333;
+    }
+    
+    .output-box {
+      background: #f8f9fa;
+      border: 2px solid #e9ecef;
+      border-radius: 6px;
+      padding: 20px;
+      min-height: 200px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      white-space: pre-wrap;
+      overflow-x: auto;
+      color: #212529;
+    }
+    
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 15px 0;
+    }
+    
+    input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+    }
+    
+    .info-box {
+      background: #e7f3ff;
+      border-left: 4px solid #2196F3;
+      padding: 15px;
+      margin: 20px 0;
+      border-radius: 4px;
+      font-size: 0.9em;
+    }
+    
+    #toast {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      background: #28a745;
+      color: white;
+      padding: 16px 24px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      display: none;
+      z-index: 1000;
+      font-weight: 600;
+      animation: slideIn 0.3s ease;
+    }
+    
+    @keyframes slideIn {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+    
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+    
+    @media (max-width: 768px) {
+      .grid-2 {
+        grid-template-columns: 1fr;
+      }
+      
+      .button-group {
+        flex-direction: column;
+      }
+      
+      button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🛠️ Ops Copilot</h1>
+      <p>Network Troubleshooting Assistant - Optimized for Cat9300/9300X, Nexus9K & Catalyst 9800</p>
+    </header>
+    
+    <div class="tabs">
+      <div class="tab active" id="tabIncident">🔧 Incident Analysis</div>
+      <div class="tab" id="tabConfig">⚙️ Config Review</div>
+    </div>
+    
+    <!-- INCIDENT PANEL -->
+    <div class="panel active" id="panelIncident">
+      <div class="info-box">
+        <strong>ℹ️ Purpose:</strong> Generate structured prompts and evidence collection templates for network troubleshooting. 
+        All processing is done locally in your browser - safe for sanitized data.
+      </div>
+      
+      <div class="form-group">
+        <label for="incType">Incident Type</label>
+        <select id="incType">
+          <option value="connectivity">Connectivity Issue</option>
+          <option value="performance">Performance/Latency</option>
+          <option value="intermittent">Intermittent/Flapping</option>
+          <option value="dhcp">DHCP/IP Issues</option>
+          <option value="wireless">Wireless Issues</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+      
+      <div class="grid-2">
+        <div class="form-group">
+          <label for="incRole">Device Role</label>
+          <select id="incRole">
+            <option value="access">Access/IDF (Cat9300/9300X)</option>
+            <option value="core">Core/Root (Nexus 9K)</option>
+            <option value="wlc">Wireless (Catalyst 9800)</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label for="incInterface">Interface (optional)</label>
+          <input type="text" id="incInterface" placeholder="e.g., gi1/0/24, te1/1/1, po2">
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label for="incImpact">Impact</label>
+        <input type="text" id="incImpact" placeholder="e.g., 5 users in Building A can't access internet">
+      </div>
+      
+      <div class="form-group">
+        <label for="incStart">When did it start?</label>
+        <input type="text" id="incStart" placeholder="e.g., 2 hours ago, this morning at 9am">
+      </div>
+      
+      <div class="form-group">
+        <label for="incEnv">Environment/Context</label>
+        <textarea id="incEnv" placeholder="e.g., Building A, 3rd floor, conference room, wireless users, Cat9300 switch stack"></textarea>
+      </div>
+      
+      <div class="form-group">
+        <label for="incSymptoms">Symptoms/User Reports</label>
+        <textarea id="incSymptoms" placeholder="e.g., Users report 'no internet', can't load websites, Teams calls dropping"></textarea>
+      </div>
+      
+      <div class="button-group">
+        <button class="btn-primary" id="incSuggestEvidence">📋 Suggest Evidence Commands</button>
+        <button class="btn-success" id="incInsertCommands">➕ Insert Evidence Worksheet</button>
+      </div>
+      
+      <div class="checkbox-group">
+        <input type="checkbox" id="incAutoSuggest" checked>
+        <label for="incAutoSuggest" style="margin: 0;">Auto-update suggestions as I type</label>
+      </div>
+      
+      <div class="form-group">
+        <label for="incEvidenceSuggest">Suggested Evidence Commands</label>
+        <textarea id="incEvidenceSuggest" readonly style="background: #f8f9fa;"></textarea>
+      </div>
+      
+      <div class="form-group">
+        <label for="incEvidence">Evidence Collection Workspace</label>
+        <textarea id="incEvidence" style="min-height: 250px;" placeholder="Paste command outputs here (sanitized)..."></textarea>
+      </div>
+      
+      <div class="checkbox-group">
+        <input type="checkbox" id="incRedact" checked>
+        <label for="incRedact" style="margin: 0;">Auto-redact IPs & emails in offline analysis</label>
+      </div>
+      
+      <div class="button-group">
+        <button class="btn-secondary" id="incOfflineAnalyze">🔍 Offline Analysis</button>
+      </div>
+      
+      <div class="form-group">
+        <label for="incOfflineAnalysis">Offline Analysis Results</label>
+        <textarea id="incOfflineAnalysis" readonly style="background: #f8f9fa; min-height: 150px;"></textarea>
+      </div>
+      
+      <div class="button-group">
+        <button class="btn-primary" id="incMakePrompt">📝 Generate AI Prompt</button>
+        <button class="btn-secondary" id="incMakeShell">📋 Generate Output Shell</button>
+      </div>
+      
+      <div class="form-group">
+        <label for="incOut">Generated Output</label>
+        <div class="output-box" id="incOut">(Output will appear here)</div>
+      </div>
+      
+      <div class="button-group">
+        <button class="btn-success" id="incCopyOut">📋 Copy Output</button>
+        <button class="btn-secondary" id="incDownload">💾 Download</button>
+        <button class="btn-danger" id="incClear">🗑️ Clear All</button>
+      </div>
+    </div>
+    
+    <!-- CONFIG REVIEW PANEL -->
+    <div class="panel" id="panelConfig">
+      <div class="info-box">
+        <strong>ℹ️ Purpose:</strong> Generate structured prompts for configuration review. 
+        Paste sanitized configs and get AI-ready prompts for security & best practice analysis.
+      </div>
+      
+      <div class="form-group">
+        <label for="cfgType">Device Type</label>
+        <select id="cfgType">
+          <option value="cat9300">Catalyst 9300/9300X (Access)</option>
+          <option value="nexus9k">Nexus 9000 (Core)</option>
+          <option value="cat9800">Catalyst 9800 (WLC)</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label for="cfgIntent">Intended Purpose / Context</label>
+        <textarea id="cfgIntent" placeholder="e.g., Access switch for Building A, 3rd floor, user VLANs 10-20, uplink to core via 10G fiber"></textarea>
+      </div>
+      
+      <div class="form-group">
+        <label for="cfgText">Configuration (sanitized)</label>
+        <textarea id="cfgText" style="min-height: 300px;" placeholder="Paste sanitized running-config or relevant config snippets here..."></textarea>
+      </div>
+      
+      <div class="button-group">
+        <button class="btn-primary" id="cfgMakePrompt">📝 Generate AI Prompt</button>
+        <button class="btn-secondary" id="cfgMakeShell">📋 Generate Output Shell</button>
+      </div>
+      
+      <div class="form-group">
+        <label for="cfgOut">Generated Output</label>
+        <div class="output-box" id="cfgOut">(Output will appear here)</div>
+      </div>
+      
+      <div class="button-group">
+        <button class="btn-success" id="cfgCopyOut">📋 Copy Output</button>
+        <button class="btn-secondary" id="cfgDownload">💾 Download</button>
+        <button class="btn-danger" id="cfgClear">🗑️ Clear All</button>
+      </div>
+    </div>
+  </div>
+  
+  <div id="toast"></div>
+  
+  <script src="ops-copilot-working-fixed.js"></script>
+</body>
+</html>
