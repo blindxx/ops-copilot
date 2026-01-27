@@ -1,1 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ops Copilot - Network Troubleshooting Assistant</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+      color: #333;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+      overflow: hidden;
+    }
+    
+    header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 30px;
+      text-align: center;
+    }
+    
+    header h1 {
+      font-size: 2.5em;
+      margin-bottom: 10px;
+      font-weight: 700;
+    }
+    
+    header p {
+      font-size: 1.1em;
+      opacity: 0.95;
+    }
+    
+    .tabs {
+      display: flex;
+      background: #f8f9fa;
+      border-bottom: 2px solid #e9ecef;
+    }
+    
+    .tab {
+      flex: 1;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 1.1em;
+      transition: all 0.3s ease;
+      border-bottom: 3px solid transparent;
+    }
+    
+    .tab:hover {
+      background: #e9ecef;
+    }
+    
+    .tab.active {
+      background: white;
+      border-bottom: 3px solid #667eea;
+      color: #667eea;
+    }
+    
+    .panel {
+      padding: 30px;
+      display: none;
+    }
+    
+    .panel.active {
+      display: block;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #495057;
+      font-size: 0.95em;
+    }
+    
+    input[type="text"],
+    textarea,
+    select {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e9ecef;
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 0.95em;
+      transition: border-color 0.3s ease;
+    }
+    
+    input[type="text"]:focus,
+    textarea:focus,
+    select:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+    
+    textarea {
+      resize: vertical;
+      min-height: 120px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    }
+    
+    .button-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 20px 0;
+    }
+    
+    button {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.95em;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      flex: 1;
+      min-width: 140px;
+    }
+    
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    
+    .btn-primary {
+      background: #667eea;
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: #5568d3;
+    }
+    
+    .btn-secondary {
+      background: #6c757d;
+      color: white;
+    }
+    
+    .btn-secondary:hover {
+      background: #5a6268;
+    }
+    
+    .btn-success {
+      background: #28a745;
+      color: white;
+    }
+    
+    .btn-success:hover {
+      background: #218838;
+    }
+    
+    .btn-danger {
+      background: #dc3545;
+      color: white;
+    }
+    
+    .btn-danger:hover {
+      background: #c82333;
+    }
+    
+    .output-box {
+      background: #f8f9fa;
+      border: 2px solid #e9ecef;
+      border-radius: 6px;
+      padding: 20px;
+      min-height: 200px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      white-space: pre-wrap;
+      overflow-x: auto;
+      color: #212529;
+    }
+    
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 15px 0;
+    }
+    
+    input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+    }
+    
+    .info-box {
+      background: #e7f3ff;
+      border-left: 4px solid #2196F3;
+      padding: 15px;
+      margin: 20px 0;
+      border-radius: 4px;
+      font-size: 0.9em;
+    }
+    
+    #toast {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      background: #28a745;
+      color: white;
+      padding: 16px 24px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      display: none;
+      z-index: 1000;
+      font-weight: 600;
+      animation: slideIn 0.3s ease;
+    }
+    
+    @keyframes slideIn {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+    
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+    
+    @media (max-width: 768px) {
+      .grid-2 {
+        grid-template-columns: 1fr;
+      }
+      
+      .button-group {
+        flex-direction: column;
+      }
+      
+      button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🛠️ Ops Copilot</h1>
+      <p>Network Troubleshooting Assistant - Optimized for Cat9300/9300X, Nexus9K & Catalyst 9800</p>
+      <p style="font-size: 0.9em; margin-top: 10px; opacity: 0.9;">Need help? See the Guide tab →</p>
+      <p style="font-size: 0.85em; margin-top: 8px; opacity: 0.9;">
+  Version: v0.9 • 2026-01-27
+</p>
 
+    </header>
+    
+    <div class="tabs">
+      <div class="tab active" id="tabIncident">🔧 Incident Analysis</div>
+      <div class="tab" id="tabConfig">⚙️ Config Review</div>
+      <div class="tab" id="tabGuide">📖 Guide</div>
+    </div>
+    
+    <!-- INCIDENT PANEL -->
+    <div class="panel active" id="panelIncident">
+      <div class="info-box">
+        <strong>ℹ️ Purpose:</strong> Generate structured prompts and evidence collection templates for network troubleshooting. 
+        All processing is done locally in your browser - safe for sanitized data.
+      </div>
+      
+      <div class="form-group">
+        <label for="incType">Incident Type</label>
+        <select id="incType">
+          <option value="wired">Wired Connectivity</option>
+          <option value="connectivity">Connectivity Issue</option>
+          <option value="performance">Performance/Latency</option>
+          <option value="intermittent">Intermittent/Flapping</option>
+          <option value="dhcp">DHCP/IP Issues</option>
+          <option value="wireless">Wireless Issues</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+      
+      <div class="grid-2">
+        <div class="form-group">
+          <label for="incRole">Device Role</label>
+          <select id="incRole">
+            <option value="access">Access/IDF (Cat9300/9300X)</option>
+            <option value="core">Core/Root (Nexus 9K)</option>
+            <option value="wlc">Wireless (Catalyst 9800)</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label for="incInterface">Interface (optional)</label>
+          <input type="text" id="incInterface" placeholder="e.g., gi1/0/24, te1/1/1, po2">
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label for="incImpact">Impact</label>
+        <input type="text" id="incImpact" placeholder="e.g., 5 users in Building A can't access internet">
+      </div>
+      
+      <div class="form-group">
+        <label for="incStart">When did it start?</label>
+        <input type="text" id="incStart" placeholder="e.g., 2 hours ago, this morning at 9am">
+      </div>
+      
+      <div class="form-group">
+        <label for="incEnv">Environment/Context</label>
+        <textarea id="incEnv" placeholder="e.g., Building A, 3rd floor, conference room, wireless users, Cat9300 switch stack"></textarea>
+      </div>
+      
+      <div class="form-group">
+        <label for="incSymptoms">Symptoms/User Reports</label>
+        <textarea id="incSymptoms" placeholder="e.g., Users report 'no internet', can't load websites, Teams calls dropping"></textarea>
+      </div>
+      
+      <div class="button-group">
+        <button class="btn-primary" id="incSuggestEvidence">📋 Suggest Evidence Commands</button>
+        <button class="btn-success" id="incInsertCommands">➕ Insert Evidence Worksheet</button>
+      </div>
+      
+      <div class="checkbox-group">
+        <input type="checkbox" id="incAutoSuggest" checked>
+        <label for="incAutoSuggest" style="margin: 0;">Auto-update suggestions as I type</label>
+      </div>
+      
+      <div class="form-group">
+        <label for="incEvidenceSuggest">Suggested Evidence Commands</label>
+        <textarea id="incEvidenceSuggest" readonly style="background: #f8f9fa;"></textarea>
+      </div>
+      
+      <div class="form-group">
+        <label for="incEvidence">Evidence Collection Workspace</label>
+        <textarea id="incEvidence" style="min-height: 250px;" placeholder="Paste command outputs here (sanitized)..."></textarea>
+      </div>
+      
+      <div class="checkbox-group">
+        <input type="checkbox" id="incRedact" checked>
+        <label for="incRedact" style="margin: 0;">Auto-redact IPs & emails in offline analysis</label>
+      </div>
+      
+      <div class="button-group">
+        <button class="btn-secondary" id="incOfflineAnalyze">🔍 Offline Analysis</button>
+      </div>
+      
+      <div class="form-group">
+        <label for="incOfflineAnalysis">Offline Analysis Results</label>
+        <textarea id="incOfflineAnalysis" readonly style="background: #f8f9fa; min-height: 150px;"></textarea>
+      </div>
+      
+      <div class="button-group">
+        <button class="btn-primary" id="incMakePrompt">📝 Generate AI Prompt</button>
+        <button class="btn-secondary" id="incMakeShell">📋 Generate Output Shell</button>
+      </div>
+      
+      <div class="form-group">
+        <label for="incOut">Generated Output</label>
+        <div class="output-box" id="incOut">(Output will appear here)</div>
+      </div>
+      
+      <div class="button-group">
+        <button class="btn-success" id="incCopyOut">📋 Copy Output</button>
+        <button class="btn-secondary" id="incDownload">💾 Download</button>
+        <button class="btn-danger" id="incClear">🗑️ Clear All</button>
+      </div>
+    </div>
+    
+    <!-- CONFIG REVIEW PANEL -->
+    <div class="panel" id="panelConfig">
+      <div class="info-box">
+        <strong>ℹ️ Purpose:</strong> Generate structured prompts for configuration review. 
+        Paste sanitized configs and get AI-ready prompts for security & best practice analysis.
+      </div>
+      
+      <div class="form-group">
+        <label for="cfgType">Device Type</label>
+        <select id="cfgType">
+          <option value="cat9300">Catalyst 9300/9300X (Access)</option>
+          <option value="nexus9k">Nexus 9000 (Core)</option>
+          <option value="cat9800">Catalyst 9800 (WLC)</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label for="cfgIntent">Intended Purpose / Context</label>
+        <textarea id="cfgIntent" placeholder="e.g., Access switch for Building A, 3rd floor, user VLANs 10-20, uplink to core via 10G fiber"></textarea>
+      </div>
+      
+      <div class="form-group">
+        <label for="cfgText">Configuration (sanitized)</label>
+        <textarea id="cfgText" style="min-height: 300px;" placeholder="Paste sanitized running-config or relevant config snippets here..."></textarea>
+      </div>
+      
+      <div class="button-group">
+        <button class="btn-primary" id="cfgMakePrompt">📝 Generate AI Prompt</button>
+        <button class="btn-secondary" id="cfgMakeShell">📋 Generate Output Shell</button>
+      </div>
+      
+      <div class="form-group">
+        <label for="cfgOut">Generated Output</label>
+        <div class="output-box" id="cfgOut">(Output will appear here)</div>
+      </div>
+      
+      <div class="button-group">
+        <button class="btn-success" id="cfgCopyOut">📋 Copy Output</button>
+        <button class="btn-secondary" id="cfgDownload">💾 Download</button>
+        <button class="btn-danger" id="cfgClear">🗑️ Clear All</button>
+      </div>
+    </div>
+    
+    <!-- GUIDE PANEL -->
+    <div class="panel" id="panelGuide">
+      <div style="max-width: 900px; margin: 0 auto; line-height: 1.6;">
+        <h2 style="margin-bottom: 20px; color: #667eea;">📖 Ops Copilot Guide</h2>
+        
+        <p style="font-size: 1.1em; margin-bottom: 20px;">A lightweight, offline network troubleshooting assistant that generates smart diagnostic commands and AI-ready prompts for Cisco environments.</p>
+        
+        <h3 style="margin-top: 30px; margin-bottom: 15px; color: #495057;">Quick Start</h3>
+        <ol style="margin-left: 20px; margin-bottom: 20px;">
+          <li><strong>Online</strong>: You're already here! Just use the tabs above.</li>
+          <li><strong>Offline</strong>: Download the files from GitHub and open <code>index.html</code> in any browser</li>
+        </ol>
+        <p style="margin-bottom: 20px;">No installation required. Works 100% offline.</p>
+        
+        <h3 style="margin-top: 30px; margin-bottom: 15px; color: #495057;">What It Does</h3>
+        
+        <p style="margin-bottom: 10px;"><strong>Incident Analysis:</strong></p>
+        <ul style="margin-left: 20px; margin-bottom: 20px;">
+          <li>Enter symptoms in plain language (e.g., "WiFi keeps dropping", "slow internet")</li>
+          <li>Get intelligent command suggestions based on keywords and device type</li>
+          <li>Auto-generates evidence collection worksheets</li>
+          <li>Performs basic offline analysis of command outputs</li>
+          <li>Creates structured AI prompts for deeper troubleshooting</li>
+        </ul>
+        
+        <p style="margin-bottom: 10px;"><strong>Config Review:</strong></p>
+<ul style="margin-left: 20px; margin-bottom: 20px;">
+  <li>Paste sanitized configs</li>
+  <li>Generate AI-ready prompts for security and best practice analysis</li>
+</ul>
+
+<h3 style="margin-top: 40px; margin-bottom: 15px; color: #495057;">🔧 How to Use Incident Analysis</h3>
+
+<div style="background: #e7f3ff; border-left: 4px solid #2196F3; padding: 15px; margin-bottom: 20px; border-radius: 4px;">
+  <strong>💡 Purpose:</strong> Get smart command suggestions and AI-ready troubleshooting prompts based on plain-language symptoms.
+</div>
+
+<p style="margin-bottom: 15px;"><strong>Step-by-Step:</strong></p>
+<ol style="margin-left: 20px; margin-bottom: 20px; line-height: 1.8;">
+  <li><strong>Select Incident Type</strong>
+    <ul style="margin-left: 20px; margin-top: 5px;">
+      <li>Wired Connectivity</li>
+      <li>Connectivity Issue</li>
+      <li>Performance/Latency</li>
+      <li>Intermittent/Flapping</li>
+      <li>DHCP/IP Issues</li>
+      <li>Wireless Issues</li>
+      <li>Other</li>
+    </ul>
+  </li>
+  <li style="margin-top: 10px;"><strong>Choose Device Role</strong>
+    <ul style="margin-left: 20px; margin-top: 5px;">
+      <li>Access/IDF (Cat9300/9300X) - Most common for end-user issues</li>
+      <li>Core/Root (Nexus 9K) - For backbone/routing issues</li>
+      <li>Wireless (Catalyst 9800) - For WiFi/AP problems</li>
+    </ul>
+  </li>
+  <li style="margin-top: 10px;"><strong>Add Interface (Optional)</strong>
+    <ul style="margin-left: 20px; margin-top: 5px;">
+      <li>Enter interface if known: <code>gi1/0/24</code>, <code>te 2/0/4</code>, <code>po-2</code></li>
+      <li>Tool accepts any format and normalizes it</li>
+    </ul>
+  </li>
+  <li style="margin-top: 10px;"><strong>Describe Symptoms in Plain Language</strong>
+    <ul style="margin-left: 20px; margin-top: 5px;">
+      <li>✅ Good: "WiFi keeps disconnecting, users get authentication errors"</li>
+      <li>✅ Good: "Link flapping on gi1/0/24, seeing errors"</li>
+      <li>✅ Good: "Internet is slow, Teams calls dropping"</li>
+      <li>The tool detects keywords like "flapping", "slow", "WiFi", "dhcp", etc.</li>
+    </ul>
+  </li>
+  <li style="margin-top: 10px;"><strong>Get Smart Command Suggestions</strong>
+    <ul style="margin-left: 20px; margin-top: 5px;">
+      <li>Click "Suggest Evidence Commands"</li>
+      <li>Tool auto-generates relevant show commands based on your symptoms</li>
+      <li>Commands adapt to device type (IOS-XE vs NX-OS vs WLC)</li>
+    </ul>
+  </li>
+  <li style="margin-top: 10px;"><strong>Insert Evidence Worksheet</strong>
+    <ul style="margin-left: 20px; margin-top: 5px;">
+      <li>Click "Insert Evidence Worksheet"</li>
+      <li>Creates a formatted template with suggested commands</li>
+      <li>Run the commands on your device and paste outputs below</li>
+    </ul>
+  </li>
+  <li style="margin-top: 10px;"><strong>Offline Analysis (Optional)</strong>
+    <ul style="margin-left: 20px; margin-top: 5px;">
+      <li>After pasting command outputs, click "Offline Analysis"</li>
+      <li>Get basic pattern detection (errors, down interfaces, etc.)</li>
+      <li>Enable auto-redaction to sanitize IPs and emails</li>
+    </ul>
+  </li>
+  <li style="margin-top: 10px;"><strong>Generate AI Prompt</strong>
+    <ul style="margin-left: 20px; margin-top: 5px;">
+      <li>Click "Generate AI Prompt" for deeper analysis</li>
+      <li>Copy and paste into ChatGPT, Claude, or your AI tool</li>
+      <li>Get structured troubleshooting steps and root cause analysis</li>
+    </ul>
+  </li>
+</ol>
+
+<p style="margin-bottom: 15px;"><strong>Smart Detection Examples:</strong></p>
+<div style="background: #f8f9fa; padding: 20px; border-radius: 6px; margin-bottom: 20px; font-family: 'Consolas', 'Monaco', monospace; font-size: 0.85em;">
+  <strong>Symptom:</strong> "WiFi keeps dropping"<br>
+  <strong>Tool detects:</strong> Wireless issue<br>
+  <strong>Suggests:</strong> show wlan summary, show ap summary, show wireless client summary, etc.<br><br>
+  
+  <strong>Symptom:</strong> "Link flapping on gi1/0/24"<br>
+  <strong>Tool detects:</strong> Interface + flapping<br>
+  <strong>Suggests:</strong> show interface gi1/0/24, show interface gi1/0/24 counters errors, show logging, etc.<br><br>
+  
+  <strong>Symptom:</strong> "Can't get DHCP address"<br>
+  <strong>Tool detects:</strong> DHCP issue<br>
+  <strong>Suggests:</strong> show ip dhcp binding, show ip dhcp snooping, show ip dhcp pool, etc.
+</div>
+
+<div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin-bottom: 20px; border-radius: 4px;">
+  <strong>💡 Pro Tip:</strong> Enable "Auto-update suggestions" to see commands refresh automatically as you type symptoms. The more details you provide, the better the suggestions!
+</div>
+        
+<h3 style="margin-top: 40px; margin-bottom: 15px; color: #495057;">📋 How to Use Config Review</h3>
+
+<div style="background: #e7f3ff; border-left: 4px solid #2196F3; padding: 15px; margin-bottom: 20px; border-radius: 4px;">
+  <strong>💡 Purpose:</strong> Get AI-ready prompts to review your configs for security issues, misconfigurations, and best practices.
+</div>
+
+<p style="margin-bottom: 15px;"><strong>Step-by-Step:</strong></p>
+<ol style="margin-left: 20px; margin-bottom: 20px; line-height: 1.8;">
+  <li><strong>Select Device Type</strong>
+    <ul style="margin-left: 20px; margin-top: 5px;">
+      <li>Catalyst 9300/9300X (Access switches)</li>
+      <li>Nexus 9000 (Core/distribution)</li>
+      <li>Catalyst 9800 (Wireless controller)</li>
+      <li>Other</li>
+    </ul>
+  </li>
+  <li style="margin-top: 10px;"><strong>Describe Intent</strong> - Explain what the device should do
+    <ul style="margin-left: 20px; margin-top: 5px;">
+      <li>Example: "Access switch for Building A, 3rd floor, user VLANs 10-20, uplink to core via 10G fiber"</li>
+      <li>Include: Location, purpose, VLANs, uplinks, special requirements</li>
+    </ul>
+  </li>
+  <li style="margin-top: 10px;"><strong>Paste Config</strong> - Add your sanitized running-config
+    <ul style="margin-left: 20px; margin-top: 5px;">
+      <li>⚠️ <strong>Always sanitize first!</strong> Remove/redact:</li>
+      <li style="margin-left: 20px;">• Passwords and secrets</li>
+      <li style="margin-left: 20px;">• Public IP addresses</li>
+      <li style="margin-left: 20px;">• Real hostnames</li>
+      <li style="margin-left: 20px;">• SNMP community strings</li>
+      <li style="margin-left: 20px;">• AAA keys</li>
+      <li>✅ Can paste full config or specific sections</li>
+    </ul>
+  </li>
+  <li style="margin-top: 10px;"><strong>Generate AI Prompt</strong>
+    <ul style="margin-left: 20px; margin-top: 5px;">
+      <li>Click "Generate AI Prompt" to create a structured review request</li>
+      <li>The prompt asks AI to check for security issues, misconfigurations, and best practices</li>
+    </ul>
+  </li>
+  <li style="margin-top: 10px;"><strong>Copy & Use with AI</strong>
+    <ul style="margin-left: 20px; margin-top: 5px;">
+      <li>Click "Copy Output" to copy the prompt</li>
+      <li>Paste into ChatGPT, Claude, or your preferred AI tool</li>
+      <li>Get findings categorized as High/Medium/Low with fix suggestions</li>
+    </ul>
+  </li>
+</ol>
+
+<p style="margin-bottom: 15px;"><strong>What the AI Checks:</strong></p>
+<ul style="margin-left: 20px; margin-bottom: 20px;">
+  <li>🔒 Security issues (weak passwords, missing ACLs, open services)</li>
+  <li>⚙️ Misconfigurations (VLAN mismatches, STP issues, routing problems)</li>
+  <li>📚 Best practices (naming conventions, QoS, redundancy)</li>
+  <li>🎯 Alignment with stated intent</li>
+</ul>
+
+<p style="margin-bottom: 15px;"><strong>Example Config Review:</strong></p>
+<div style="background: #f8f9fa; padding: 20px; border-radius: 6px; margin-bottom: 20px; font-family: 'Consolas', 'Monaco', monospace; font-size: 0.85em;">
+  <strong>Device Type:</strong> Catalyst 9300<br>
+  <strong>Intent:</strong> Access switch for guest WiFi, isolated VLAN 99, no internet access, logging to syslog server<br><br>
+  <strong>Config snippet:</strong><br>
+  vlan 99<br>
+   name GUEST_WIFI<br>
+  !<br>
+  interface GigabitEthernet1/0/1<br>
+   description AP-Guest-Floor3<br>
+   switchport mode access<br>
+   switchport access vlan 99<br>
+   spanning-tree portfast<br>
+  !<br><br>
+  
+  <strong>AI will check:</strong><br>
+  • Is VLAN 99 properly isolated? (ACLs, no routing)<br>
+  • Is internet access actually blocked?<br>
+  • Is syslog configured?<br>
+  • Are there any security gaps?<br>
+  • Best practices for guest networks
+</div>
+
+<div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin-bottom: 20px; border-radius: 4px;">
+  <strong>⚠️ Remember:</strong> This tool generates prompts for AI review. It doesn't analyze configs itself. Always verify AI suggestions with network documentation and change control procedures.
+</div>
+        
+        <h3 style="margin-top: 30px; margin-bottom: 15px; color: #495057;">Key Features</h3>
+        <ul style="margin-left: 20px; margin-bottom: 20px;">
+          <li>✅ <strong>Smart Detection</strong> - Understands natural language ("flapping", "can't connect", "slow")</li>
+          <li>✅ <strong>Platform-Aware</strong> - Adapts to Cat9300/9300X, Nexus9K, or Cat9800 WLC</li>
+          <li>✅ <strong>Interface Parsing</strong> - Handles <code>gi1/0/24</code>, <code>te 2/0/4</code>, <code>po-2</code> formats</li>
+          <li>✅ <strong>Offline Analysis</strong> - Basic diagnostics without external APIs</li>
+          <li>✅ <strong>Auto-Redaction</strong> - Sanitizes IPs and emails</li>
+          <li>✅ <strong>100% Offline</strong> - No data leaves your browser</li>
+        </ul>
+        
+        <h3 style="margin-top: 30px; margin-bottom: 15px; color: #495057;">Usage Example</h3>
+        <div style="background: #f8f9fa; padding: 20px; border-radius: 6px; margin-bottom: 20px; font-family: 'Consolas', 'Monaco', monospace; font-size: 0.9em;">
+          <strong>Input:</strong><br>
+          Type: Wireless Issues<br>
+          Symptoms: "Users in conference room can't connect to WiFi, authentication errors"<br>
+          Device: Catalyst 9800 WLC<br><br>
+          
+          <strong>Output:</strong><br>
+          # Auto-suggested commands<br>
+          show wlan summary<br>
+          show wireless client summary<br>
+          show ap summary<br>
+          show wireless client mac &lt;MAC&gt; detail<br>
+          show radius server-group detail<br>
+          # ... and more
+        </div>
+        <p style="margin-bottom: 20px;">The tool detects "authentication" and automatically includes auth-specific commands.</p>
+        
+        <h3 style="margin-top: 30px; margin-bottom: 15px; color: #495057;">Supported Platforms</h3>
+        <ul style="margin-left: 20px; margin-bottom: 20px;">
+          <li><strong>Access</strong>: Catalyst 9300, 9300X (IOS-XE)</li>
+          <li><strong>Core</strong>: Nexus 9000 Series (NX-OS)</li>
+          <li><strong>Wireless</strong>: Catalyst 9800 WLC</li>
+          <li><strong>APs</strong>: Catalyst 9100 Series</li>
+        </ul>
+        
+        <h3 style="margin-top: 30px; margin-bottom: 15px; color: #495057;">Privacy & Security</h3>
+        <ul style="margin-left: 20px; margin-bottom: 20px;">
+          <li>100% client-side JavaScript - no server communication</li>
+          <li>Safe for sanitized/redacted data</li>
+          <li>Auto-redaction available for IPs and emails</li>
+          <li>No data storage or tracking</li>
+        </ul>
+        
+        <h3 style="margin-top: 30px; margin-bottom: 15px; color: #495057;">Tips</h3>
+        <ul style="margin-left: 20px; margin-bottom: 20px;">
+          <li><strong>Auto-update</strong>: Enable "Auto-update suggestions" to see recommendations refresh as you type</li>
+          <li><strong>Multiple symptoms</strong>: Tool detects multiple issue types and combines relevant commands</li>
+          <li><strong>Any interface format</strong>: <code>gi1/0/24</code>, <code>g 1/0/24</code>, <code>GigabitEthernet1/0/24</code> all work</li>
+        </ul>
+        
+        <hr style="margin: 40px 0; border: none; border-top: 1px solid #e9ecef;">
+        <p style="text-align: center; color: #6c757d;"><strong>Made for Network Operations Teams</strong></p>
+      </div>
+    </div>
+  </div>
+  
+  <div id="toast"></div>
+  
+ <script src="../ops-copilot-working-fixed.js?v=20260127a"></script>
+</body>
+</html>
