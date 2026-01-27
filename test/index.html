@@ -1,6 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <div style="
+  background:#dc3545;
+  color:#fff;
+  font-weight:800;
+  letter-spacing:0.5px;
+  padding:10px 14px;
+  border-radius:10px;
+  display:inline-block;
+  margin-bottom:12px;
+  box-shadow:0 6px 18px rgba(0,0,0,.25);
+">
+  🧪 TEST BUILD — NOT FOR PRODUCTION USE
+</div>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ops Copilot - Network Troubleshooting Assistant</title>
@@ -264,6 +277,9 @@
   <div class="container">
     <header>
       <h1>🛠️ Ops Copilot</h1>
+      <p style="font-size:0.9em; margin-top:8px; opacity:0.95;">
+  TEST BUILD • v0.9-dev • 2026-01-27
+</p>
       <p>Network Troubleshooting Assistant - Optimized for Cat9300/9300X, Nexus9K & Catalyst 9800</p>
       <p style="font-size: 0.9em; margin-top: 10px; opacity: 0.9;">Need help? See the Guide tab →</p>
       <p style="font-size: 0.85em; margin-top: 8px; opacity: 0.9;">
@@ -281,7 +297,16 @@
     <!-- INCIDENT PANEL -->
     <div class="panel active" id="panelIncident">
       <div class="info-box">
-        <strong>ℹ️ Purpose:</strong> Generate structured prompts and evidence collection templates for network troubleshooting. 
+        <strong>ℹ️ Purpose:</strong> Generate structured prompts and evidence collection templates for network troubleshooting.
+        <div class="info-box" style="border-left-color:#dc3545; background:#fff0f1;">
+  <strong>📝 Working Notes (Dev/Test):</strong>
+  <ul style="margin:10px 0 0 18px;">
+    <li>Use this build for experimenting and verifying fixes.</li>
+    <li>Stable team build is the root site: <code>/ops-copilot/</code></li>
+    <li>Test build is: <code>/ops-copilot/test/</code></li>
+    <li>When a change is confirmed, copy it into the main build.</li>
+  </ul>
+</div>
         All processing is done locally in your browser - safe for sanitized data.
       </div>
       
