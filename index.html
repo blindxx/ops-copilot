@@ -451,10 +451,93 @@
         </ul>
         
         <p style="margin-bottom: 10px;"><strong>Config Review:</strong></p>
-        <ul style="margin-left: 20px; margin-bottom: 20px;">
-          <li>Paste sanitized configs</li>
-          <li>Generate AI-ready prompts for security and best practice analysis</li>
-        </ul>
+<ul style="margin-left: 20px; margin-bottom: 20px;">
+  <li>Paste sanitized configs</li>
+  <li>Generate AI-ready prompts for security and best practice analysis</li>
+</ul>
+
+<h3 style="margin-top: 40px; margin-bottom: 15px; color: #495057;">📋 How to Use Config Review</h3>
+
+<div style="background: #e7f3ff; border-left: 4px solid #2196F3; padding: 15px; margin-bottom: 20px; border-radius: 4px;">
+  <strong>💡 Purpose:</strong> Get AI-ready prompts to review your configs for security issues, misconfigurations, and best practices.
+</div>
+
+<p style="margin-bottom: 15px;"><strong>Step-by-Step:</strong></p>
+<ol style="margin-left: 20px; margin-bottom: 20px; line-height: 1.8;">
+  <li><strong>Select Device Type</strong>
+    <ul style="margin-left: 20px; margin-top: 5px;">
+      <li>Catalyst 9300/9300X (Access switches)</li>
+      <li>Nexus 9000 (Core/distribution)</li>
+      <li>Catalyst 9800 (Wireless controller)</li>
+      <li>Other</li>
+    </ul>
+  </li>
+  <li style="margin-top: 10px;"><strong>Describe Intent</strong> - Explain what the device should do
+    <ul style="margin-left: 20px; margin-top: 5px;">
+      <li>Example: "Access switch for Building A, 3rd floor, user VLANs 10-20, uplink to core via 10G fiber"</li>
+      <li>Include: Location, purpose, VLANs, uplinks, special requirements</li>
+    </ul>
+  </li>
+  <li style="margin-top: 10px;"><strong>Paste Config</strong> - Add your sanitized running-config
+    <ul style="margin-left: 20px; margin-top: 5px;">
+      <li>⚠️ <strong>Always sanitize first!</strong> Remove/redact:</li>
+      <li style="margin-left: 20px;">• Passwords and secrets</li>
+      <li style="margin-left: 20px;">• Public IP addresses</li>
+      <li style="margin-left: 20px;">• Real hostnames</li>
+      <li style="margin-left: 20px;">• SNMP community strings</li>
+      <li style="margin-left: 20px;">• AAA keys</li>
+      <li>✅ Can paste full config or specific sections</li>
+    </ul>
+  </li>
+  <li style="margin-top: 10px;"><strong>Generate AI Prompt</strong>
+    <ul style="margin-left: 20px; margin-top: 5px;">
+      <li>Click "Generate AI Prompt" to create a structured review request</li>
+      <li>The prompt asks AI to check for security issues, misconfigurations, and best practices</li>
+    </ul>
+  </li>
+  <li style="margin-top: 10px;"><strong>Copy & Use with AI</strong>
+    <ul style="margin-left: 20px; margin-top: 5px;">
+      <li>Click "Copy Output" to copy the prompt</li>
+      <li>Paste into ChatGPT, Claude, or your preferred AI tool</li>
+      <li>Get findings categorized as High/Medium/Low with fix suggestions</li>
+    </ul>
+  </li>
+</ol>
+
+<p style="margin-bottom: 15px;"><strong>What the AI Checks:</strong></p>
+<ul style="margin-left: 20px; margin-bottom: 20px;">
+  <li>🔒 Security issues (weak passwords, missing ACLs, open services)</li>
+  <li>⚙️ Misconfigurations (VLAN mismatches, STP issues, routing problems)</li>
+  <li>📚 Best practices (naming conventions, QoS, redundancy)</li>
+  <li>🎯 Alignment with stated intent</li>
+</ul>
+
+<p style="margin-bottom: 15px;"><strong>Example Config Review:</strong></p>
+<div style="background: #f8f9fa; padding: 20px; border-radius: 6px; margin-bottom: 20px; font-family: 'Consolas', 'Monaco', monospace; font-size: 0.85em;">
+  <strong>Device Type:</strong> Catalyst 9300<br>
+  <strong>Intent:</strong> Access switch for guest WiFi, isolated VLAN 99, no internet access, logging to syslog server<br><br>
+  <strong>Config snippet:</strong><br>
+  vlan 99<br>
+   name GUEST_WIFI<br>
+  !<br>
+  interface GigabitEthernet1/0/1<br>
+   description AP-Guest-Floor3<br>
+   switchport mode access<br>
+   switchport access vlan 99<br>
+   spanning-tree portfast<br>
+  !<br><br>
+  
+  <strong>AI will check:</strong><br>
+  • Is VLAN 99 properly isolated? (ACLs, no routing)<br>
+  • Is internet access actually blocked?<br>
+  • Is syslog configured?<br>
+  • Are there any security gaps?<br>
+  • Best practices for guest networks
+</div>
+
+<div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin-bottom: 20px; border-radius: 4px;">
+  <strong>⚠️ Remember:</strong> This tool generates prompts for AI review. It doesn't analyze configs itself. Always verify AI suggestions with network documentation and change control procedures.
+</div>
         
         <h3 style="margin-top: 30px; margin-bottom: 15px; color: #495057;">Key Features</h3>
         <ul style="margin-left: 20px; margin-bottom: 20px;">
