@@ -1,6 +1,38 @@
 # Ops Copilot 🛠️
+🔗 **Live Tool:** https://blindxx.github.io/ops-copilot/
 
 A lightweight, offline network troubleshooting assistant that generates smart diagnostic commands and AI-ready prompts for Cisco environments.
+
+## What is Ops Copilot?
+
+Ops Copilot is a browser-based troubleshooting assistant built for network operations teams.  
+It translates plain-language symptoms into smart Cisco diagnostic commands and structured AI prompts.
+
+It helps you:
+
+- Turn user complaints into targeted CLI commands  
+- Collect organized troubleshooting evidence  
+- Perform basic offline analysis  
+- Generate clean summaries for tickets or escalation  
+- Create AI-ready prompts for deeper investigation  
+
+No installation required. No data leaves your browser.
+
+## Who Should Use This?
+
+Designed for:
+
+- Network Engineers  
+- NOC Technicians  
+- IT Support Teams  
+- Anyone troubleshooting Cisco wired or wireless networks  
+
+Optimized for:
+
+- Catalyst 9300 / 9300X  
+- Nexus 9000  
+- Catalyst 9800 WLC  
+
 
 ## Quick Start
 
@@ -30,6 +62,16 @@ No installation required. Works 100% offline.
 ✅ **Offline Analysis** - Basic diagnostics without external APIs  
 ✅ **Auto-Redaction** - Sanitizes IPs and emails  
 ✅ **100% Offline** - No data leaves your browser  
+
+## Example Workflow
+
+1. User says: *"WiFi keeps dropping and Teams disconnects."*  
+2. Enter symptoms → Click **Suggest Evidence Commands**  
+3. Run commands on device → Paste output into Evidence box  
+4. Click **Offline Analysis**  
+5. Click **Generate Output Shell**  
+6. Paste output into a ticket or share with AI for deeper help  
+
 
 ## Usage Example
 
@@ -76,3 +118,12 @@ The tool detects "authentication" and automatically includes auth-specific comma
 ---
 
 **Made for Network Operations Teams**
+## Change Log
+
+### v0.9 – Jan 2026
+- Restored advanced evidence detection logic  
+- Fixed Suggest Evidence button wiring  
+- Fixed Generate Output Shell after Offline Analysis  
+- Added role-aware deep-dive detection (DHCP, DNS, M365, flapping, auth)  
+- Improved wireless and login troubleshooting suggestions  
+
