@@ -456,6 +456,95 @@
   <li>Generate AI-ready prompts for security and best practice analysis</li>
 </ul>
 
+<h3 style="margin-top: 40px; margin-bottom: 15px; color: #495057;">🔧 How to Use Incident Analysis</h3>
+
+<div style="background: #e7f3ff; border-left: 4px solid #2196F3; padding: 15px; margin-bottom: 20px; border-radius: 4px;">
+  <strong>💡 Purpose:</strong> Get smart command suggestions and AI-ready troubleshooting prompts based on plain-language symptoms.
+</div>
+
+<p style="margin-bottom: 15px;"><strong>Step-by-Step:</strong></p>
+<ol style="margin-left: 20px; margin-bottom: 20px; line-height: 1.8;">
+  <li><strong>Select Incident Type</strong>
+    <ul style="margin-left: 20px; margin-top: 5px;">
+      <li>Wired Connectivity</li>
+      <li>Connectivity Issue</li>
+      <li>Performance/Latency</li>
+      <li>Intermittent/Flapping</li>
+      <li>DHCP/IP Issues</li>
+      <li>Wireless Issues</li>
+      <li>Other</li>
+    </ul>
+  </li>
+  <li style="margin-top: 10px;"><strong>Choose Device Role</strong>
+    <ul style="margin-left: 20px; margin-top: 5px;">
+      <li>Access/IDF (Cat9300/9300X) - Most common for end-user issues</li>
+      <li>Core/Root (Nexus 9K) - For backbone/routing issues</li>
+      <li>Wireless (Catalyst 9800) - For WiFi/AP problems</li>
+    </ul>
+  </li>
+  <li style="margin-top: 10px;"><strong>Add Interface (Optional)</strong>
+    <ul style="margin-left: 20px; margin-top: 5px;">
+      <li>Enter interface if known: <code>gi1/0/24</code>, <code>te 2/0/4</code>, <code>po-2</code></li>
+      <li>Tool accepts any format and normalizes it</li>
+    </ul>
+  </li>
+  <li style="margin-top: 10px;"><strong>Describe Symptoms in Plain Language</strong>
+    <ul style="margin-left: 20px; margin-top: 5px;">
+      <li>✅ Good: "WiFi keeps disconnecting, users get authentication errors"</li>
+      <li>✅ Good: "Link flapping on gi1/0/24, seeing errors"</li>
+      <li>✅ Good: "Internet is slow, Teams calls dropping"</li>
+      <li>The tool detects keywords like "flapping", "slow", "WiFi", "dhcp", etc.</li>
+    </ul>
+  </li>
+  <li style="margin-top: 10px;"><strong>Get Smart Command Suggestions</strong>
+    <ul style="margin-left: 20px; margin-top: 5px;">
+      <li>Click "Suggest Evidence Commands"</li>
+      <li>Tool auto-generates relevant show commands based on your symptoms</li>
+      <li>Commands adapt to device type (IOS-XE vs NX-OS vs WLC)</li>
+    </ul>
+  </li>
+  <li style="margin-top: 10px;"><strong>Insert Evidence Worksheet</strong>
+    <ul style="margin-left: 20px; margin-top: 5px;">
+      <li>Click "Insert Evidence Worksheet"</li>
+      <li>Creates a formatted template with suggested commands</li>
+      <li>Run the commands on your device and paste outputs below</li>
+    </ul>
+  </li>
+  <li style="margin-top: 10px;"><strong>Offline Analysis (Optional)</strong>
+    <ul style="margin-left: 20px; margin-top: 5px;">
+      <li>After pasting command outputs, click "Offline Analysis"</li>
+      <li>Get basic pattern detection (errors, down interfaces, etc.)</li>
+      <li>Enable auto-redaction to sanitize IPs and emails</li>
+    </ul>
+  </li>
+  <li style="margin-top: 10px;"><strong>Generate AI Prompt</strong>
+    <ul style="margin-left: 20px; margin-top: 5px;">
+      <li>Click "Generate AI Prompt" for deeper analysis</li>
+      <li>Copy and paste into ChatGPT, Claude, or your AI tool</li>
+      <li>Get structured troubleshooting steps and root cause analysis</li>
+    </ul>
+  </li>
+</ol>
+
+<p style="margin-bottom: 15px;"><strong>Smart Detection Examples:</strong></p>
+<div style="background: #f8f9fa; padding: 20px; border-radius: 6px; margin-bottom: 20px; font-family: 'Consolas', 'Monaco', monospace; font-size: 0.85em;">
+  <strong>Symptom:</strong> "WiFi keeps dropping"<br>
+  <strong>Tool detects:</strong> Wireless issue<br>
+  <strong>Suggests:</strong> show wlan summary, show ap summary, show wireless client summary, etc.<br><br>
+  
+  <strong>Symptom:</strong> "Link flapping on gi1/0/24"<br>
+  <strong>Tool detects:</strong> Interface + flapping<br>
+  <strong>Suggests:</strong> show interface gi1/0/24, show interface gi1/0/24 counters errors, show logging, etc.<br><br>
+  
+  <strong>Symptom:</strong> "Can't get DHCP address"<br>
+  <strong>Tool detects:</strong> DHCP issue<br>
+  <strong>Suggests:</strong> show ip dhcp binding, show ip dhcp snooping, show ip dhcp pool, etc.
+</div>
+
+<div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin-bottom: 20px; border-radius: 4px;">
+  <strong>💡 Pro Tip:</strong> Enable "Auto-update suggestions" to see commands refresh automatically as you type symptoms. The more details you provide, the better the suggestions!
+</div>
+        
 <h3 style="margin-top: 40px; margin-bottom: 15px; color: #495057;">📋 How to Use Config Review</h3>
 
 <div style="background: #e7f3ff; border-left: 4px solid #2196F3; padding: 15px; margin-bottom: 20px; border-radius: 4px;">
