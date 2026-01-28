@@ -960,29 +960,30 @@ Questions:
     const incEvidenceBox = document.getElementById("incEvidence");
     const incSuggestBox = document.getElementById("incEvidenceSuggest");
     const incOfflineBox = document.getElementById("incOfflineAnalysis");
-	  // Auto-set Role based on Incident Type dropdown
-const incTypeEl_autoRole = document.getElementById("incType");
-const incRoleEl_autoRole = document.getElementById("incRole");
-
-if (incTypeEl_autoRole && incRoleEl_autoRole) {
-  incTypeEl_autoRole.addEventListener("change", () => {
-    const t = String(incTypeEl_autoRole.value || "").toLowerCase();
-
-    if (t === "wireless") incRoleEl_autoRole.value = "wlc";
-    else incRoleEl_autoRole.value = "access";
-  });
-}
-	  // Auto-set Role based on Incident Type
+	  
+	// Auto-set Role based on Incident Type (single source of truth)
 function autoSetRoleFromIncidentType() {
-  const typeEl = document.getElementById("incType");
-  const roleEl = document.getElementById("incRole");
-  if (!typeEl || !roleEl) return;
+  const incTypeEl = document.getElementById("incType");
+  const incRoleEl = document.getElementById("incRole");
+  if (!incTypeEl || !incRoleEl) return;
 
-  const t = String(typeEl.value || "").toLowerCase();
+  const t = String(incTypeEl.value || "").toLowerCase();
+  incRoleEl.value = (t === "wireless") ? "wlc" : "access";
 
-  if (t === "wireless") roleEl.value = "wlc";
-  else roleEl.value = "access"; // default for everything else
+  // Kick existing watchers/listeners (presets/autosuggest rely on these)
+  incRoleEl.dispatchEvent(new Event("change", { bubbles: true }));
+  incRoleEl.dispatchEvent(new Event("input", { bubbles: true }));
 }
+
+// Wire it up: run once on load + whenever Incident Type changes
+(() => {
+  const incTypeEl = document.getElementById("incType");
+  if (!incTypeEl) return;
+
+  autoSetRoleFromIncidentType(); // set immediately on page load
+  incTypeEl.addEventListener("change", autoSetRoleFromIncidentType);
+})();
+
  	// ========== Quick Preset Buttons ==========
     const presetText = {
       no_internet: "Users report no internet access. They can't load websites or access cloud services.",
