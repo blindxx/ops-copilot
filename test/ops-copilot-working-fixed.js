@@ -143,6 +143,12 @@ function evidenceSuggestions(incidentType, symptomsText, envText, role, iface){
   const sRaw = (symptomsText || "");
   const s = sRaw.toLowerCase();
   const env = (envText || "").toLowerCase();
+  // Normalize dropdown incident type (your HTML uses lowercase values)
+	const typeNorm = String(incidentType || "").toLowerCase();
+	const isWirelessType = typeNorm === "wireless";
+	const isWiredType = typeNorm === "wired" || typeNorm === "connectivity";
+	const isDhcpType = typeNorm === "dhcp";
+	const isOtherType = typeNorm === "other";
 
   // --- IP hint extractor (first IPv4 in symptoms) ---
   let ipHint = "";
@@ -464,7 +470,7 @@ function evidenceSuggestions(incidentType, symptomsText, envText, role, iface){
   out.push("");
 
   // Wired evidence: Catalyst
-  if ((incidentType === "Wired" || incidentType === "Other") && effectiveRole === "access") {
+	if ((isWiredType || isOtherType) && effectiveRole === "access") {
     out.push("=== Wired / Catalyst 9300/9300X (IOS-XE) ===");
     out.push("show interfaces | i line protocol|error|CRC|input errors|output errors");
     if (hasLink) out.push("show logging | i LINK|UPDOWN|ERRDISABLE|UDLD");
@@ -496,7 +502,7 @@ function evidenceSuggestions(incidentType, symptomsText, envText, role, iface){
   }
 
   // Wireless evidence: 9800 WLC
-  if (incidentType === "Wireless" || hasWifi || effectiveRole === "wlc") {
+	if (isWirelessType || hasWifi || effectiveRole === "wlc") {
     out.push("=== Wireless / Catalyst 9800 WLC (IOS-XE) ===");
     out.push("show ap summary");
     out.push("show ap join stats summary");
@@ -583,7 +589,7 @@ function evidenceSuggestions(incidentType, symptomsText, envText, role, iface){
   }
 
   // DHCP/DNS (with role-aware deepening)
-  if (incidentType === "DHCP/DNS" || hasDhcp || hasDns) {
+	if (isDhcpType || hasDhcp || hasDns) {
     out.push("=== DHCP / DNS evidence ===");
 
     if (hasDhcp || incidentType === "DHCP/DNS") {
