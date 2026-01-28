@@ -942,8 +942,39 @@ Questions:
     const incEvidenceBox = document.getElementById("incEvidence");
     const incSuggestBox = document.getElementById("incEvidenceSuggest");
     const incOfflineBox = document.getElementById("incOfflineAnalysis");
- 
-    
+ 	// ========== Quick Preset Buttons ==========
+    const presetText = {
+      no_internet: "Users report no internet access. They can't load websites or access cloud services.",
+      dhcp: "Devices unable to obtain IP address. Getting APIPA 169.254.x.x addresses or no IP at all.",
+      dns: "Can't resolve hostnames. Websites won't load but can ping IP addresses directly.",
+      wifi_drop: "WiFi keeps disconnecting. Users connected to WiFi but keeps dropping connection.",
+      auth_8021x: "802.1x authentication failures. Users can't authenticate to the network.",
+      m365: "Microsoft 365 / Teams / Outlook issues. Applications slow or not connecting.",
+      flap_port: "Interface flapping. Link going up and down repeatedly.",
+      slow: "Network is slow. High latency, buffering, packet loss reported."
+    };
+    // Attach listeners to all preset buttons
+document.querySelectorAll('[data-preset]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const presetKey = btn.getAttribute('data-preset');
+    const text = presetText[presetKey];
+    if (!text) return;
+
+    // Fill symptoms box
+    const symptomsBox = document.getElementById('incSymptoms');
+    if (symptomsBox) symptomsBox.value = text;
+
+    // If auto-suggest is enabled, trigger Suggest Evidence button
+    const autoSuggest = document.getElementById('incAutoSuggest')?.checked;
+    if (autoSuggest) {
+      const suggestBtn = document.getElementById('incSuggestEvidence');
+      if (suggestBtn) suggestBtn.click();
+    }
+
+    showToast(`Loaded preset: ${presetKey}`);
+  });
+});
+
     // Fix: Suggest Evidence Commands button wiring
     const incSuggestBtn = document.getElementById("incSuggestEvidence");
     if (incSuggestBtn) {
