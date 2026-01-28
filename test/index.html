@@ -356,6 +356,19 @@
       
       <div class="form-group">
         <label for="incSymptoms">Symptoms/User Reports</label>
+        <div class="form-group">
+        <label>Quick Presets (click to fill symptoms)</label>
+        <div class="button-group" style="margin-top:10px;">
+          <button class="btn-secondary" type="button" data-preset="no_internet">🌐 No Internet</button>
+          <button class="btn-secondary" type="button" data-preset="dhcp">📦 DHCP / No IP</button>
+          <button class="btn-secondary" type="button" data-preset="dns">🧠 DNS / Can’t Resolve</button>
+          <button class="btn-secondary" type="button" data-preset="wifi_drop">📶 WiFi Dropping</button>
+          <button class="btn-secondary" type="button" data-preset="auth_8021x">🔐 802.1X / Auth</button>
+          <button class="btn-secondary" type="button" data-preset="m365">🟦 Teams / M365</button>
+          <button class="btn-secondary" type="button" data-preset="flap_port">🔁 Flapping Port</button>
+          <button class="btn-secondary" type="button" data-preset="slow">🐢 Slow / Latency</button>
+        </div>
+      </div>
         <textarea id="incSymptoms" placeholder="e.g., Users report 'no internet', can't load websites, Teams calls dropping"></textarea>
       </div>
       
