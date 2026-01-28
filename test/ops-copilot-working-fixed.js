@@ -919,6 +919,18 @@ Questions:
 	// ==========================================================
 // NEW: Auto-regenerate Suggested Evidence when fields change
 // ==========================================================
+	function autoSetRoleFromIncidentType() {
+  const typeEl = document.getElementById("incType");
+  const roleEl = document.getElementById("incRole");
+  if (!typeEl || !roleEl) return;
+
+  const t = String(typeEl.value || "").toLowerCase();
+
+  // Map Incident Type -> Role
+  if (t === "wireless") roleEl.value = "wlc";
+  else if (t === "dhcp") roleEl.value = "access"; // usually starts at access; adjust if your core does DHCP
+  else if (t === "wired" || t === "connectivity" || t === "performance" || t === "intermittent" || t === "other") roleEl.value = "access";
+}
 	function refreshEvidenceSuggestions(){
 	const auto = document.getElementById("incAutoSuggest")?.checked;
 	if (!auto) return;
@@ -948,6 +960,29 @@ Questions:
     const incEvidenceBox = document.getElementById("incEvidence");
     const incSuggestBox = document.getElementById("incEvidenceSuggest");
     const incOfflineBox = document.getElementById("incOfflineAnalysis");
+	  // Auto-set Role based on Incident Type dropdown
+const incTypeEl_autoRole = document.getElementById("incType");
+const incRoleEl_autoRole = document.getElementById("incRole");
+
+if (incTypeEl_autoRole && incRoleEl_autoRole) {
+  incTypeEl_autoRole.addEventListener("change", () => {
+    const t = String(incTypeEl_autoRole.value || "").toLowerCase();
+
+    if (t === "wireless") incRoleEl_autoRole.value = "wlc";
+    else incRoleEl_autoRole.value = "access";
+  });
+}
+	  // Auto-set Role based on Incident Type
+function autoSetRoleFromIncidentType() {
+  const typeEl = document.getElementById("incType");
+  const roleEl = document.getElementById("incRole");
+  if (!typeEl || !roleEl) return;
+
+  const t = String(typeEl.value || "").toLowerCase();
+
+  if (t === "wireless") roleEl.value = "wlc";
+  else roleEl.value = "access"; // default for everything else
+}
  	// ========== Quick Preset Buttons ==========
     const presetText = {
       no_internet: "Users report no internet access. They can't load websites or access cloud services.",
