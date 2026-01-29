@@ -70,34 +70,8 @@ if (DEBUG) {
 // - Safe for sanitized data
 // - Optimized for Cat9300/9300X + Nexus9K + Catalyst 9800
 // ==========================================================
-  // ==========================================================
-// JS SECTION: TAB SWITCHING
-// ==========================================================
-document.addEventListener("DOMContentLoaded", () => {
-  const tabIncident = document.getElementById('tabIncident');
-  const tabConfig   = document.getElementById('tabConfig');
-  const tabGuide    = document.getElementById('tabGuide');
-  const panelIncident = document.getElementById('panelIncident');
-  const panelConfig   = document.getElementById('panelConfig');
-  const panelGuide    = document.getElementById('panelGuide');
- 
-  function activate(which){
-    const isIncident = (which === 'incident');
-    const isConfig = (which === 'config');
-    const isGuide = (which === 'guide');
-    
-    tabIncident.classList.toggle('active', isIncident);
-    tabConfig.classList.toggle('active', isConfig);
-    tabGuide.classList.toggle('active', isGuide);
-    
-    panelIncident.style.display = isIncident ? 'block' : 'none';
-    panelConfig.style.display   = isConfig ? 'block' : 'none';
-    panelGuide.style.display    = isGuide ? 'block' : 'none';
-  }
-  tabIncident.addEventListener('click', () => activate('incident'));
-  tabConfig.addEventListener('click', () => activate('config'));
-  tabGuide.addEventListener('click', () => activate('guide'));
-  });
+
+
  
 // ==========================================================
 // JS SECTION: HELPERS (toast, download, redaction)
@@ -154,12 +128,30 @@ function evidenceSuggestions(incidentType, symptomsText, envText, role, iface){
   // Prefer explicit iface; fall back to parsing from symptoms/env
   let ifc = normalizeIfc(iface) || extractIfcFromText(symptomsText) || extractIfcFromText(envText);
 
-  // Infer role if notes hint at it
-  let effectiveRole = role || "access";
-  if (/nexus|n9k|nx-?os/.test(env)) effectiveRole = "core";
-  if (/9800|wlc/.test(env)) effectiveRole = "wlc";
+    // Infer role (but NEVER clobber a real dropdown selection)
+  // If role is missing/blank, infer from incident type + symptoms + env.
+  let effectiveRole = (role || "").toLowerCase().trim();
 
-  // --- End-user friendly keyword detection ---
+  // Normalize common variants just in case something upstream passes "wireless"
+  if (effectiveRole === "wireless") effectiveRole = "wlc";
+
+  if (!effectiveRole) {
+    const all = `${incidentType || ""} ${symptomsText || ""} ${envText || ""}`.toLowerCase();
+
+    const looksWireless =
+      incidentType === "wireless" ||
+      /\bwifi\b|\bwi-fi\b|\bssid\b|\bwlan\b|\bwlc\b|catalyst\s*9800|\b9800\b|\bap\b|\baccess point\b|\b9166\b|\b9130\b/.test(all);
+
+    const looksCore =
+      /\bnexus\b|\bn9k\b|\bnx-?os\b|\bbgp\b|\bospf\b|\bhsrp\b|\bvrrp\b|\bvpc\b|\brouting\b/.test(all);
+
+    effectiveRole = looksWireless ? "wlc" : (looksCore ? "core" : "access");
+  }
+
+  // OPTIONAL: if you still want env-hints, only use them as a fallback
+  // when role was missing (already handled above). Do NOT override explicit role.
+
+	// --- End-user friendly keyword detection ---
   const hasLink = /link|down|updown|unplugged|cable|errdisable|udld|line protocol|notconnect|not connect/.test(s);
 
   // Flapping / intermittent
@@ -908,7 +900,62 @@ Questions:
   // ==========================================================
 // JS SECTION: EVENT LISTENERS / BUTTON WIRING
 // ==========================================================
-  window.addEventListener("DOMContentLoaded", () => {
+	  window.addEventListener("DOMContentLoaded", () => {
+  // ===== AUTO ROLE FROM INCIDENT TYPE (FIX) =====
+  const incTypeEl = document.getElementById("incType");
+  const incRoleEl = document.getElementById("incRole");
+
+  function autoSetRoleFromIncidentType() {
+    if (!incTypeEl || !incRoleEl) return;
+
+    const t = String(incTypeEl.value || "").toLowerCase().trim();
+
+    // Map Incident Type -> Role
+    // (adjust these if your dropdown uses slightly different labels)
+    if (t === "wireless") incRoleEl.value = "wlc";
+    else if (t === "wan/isp") incRoleEl.value = "core";
+    else if (t === "dhcp/dns" || t === "dhcp") incRoleEl.value = "access";
+    else incRoleEl.value = "access";
+  }
+
+  // Run once on load + every time incident type changes
+  autoSetRoleFromIncidentType();
+  if (incTypeEl) incTypeEl.addEventListener("change", autoSetRoleFromIncidentType);
+
+ // ===== TAB SWITCHING (SAFE) =====
+const tabIncident   = document.getElementById('tabIncident');
+const tabConfig     = document.getElementById('tabConfig');
+const tabGuide      = document.getElementById('tabGuide');
+const panelIncident = document.getElementById('panelIncident');
+const panelConfig   = document.getElementById('panelConfig');
+const panelGuide    = document.getElementById('panelGuide');
+
+// STOP if any tab element is missing (prevents random breakage)
+if (!tabIncident || !tabConfig || !tabGuide || !panelIncident || !panelConfig || !panelGuide) {
+  console.warn("Tabs: missing element(s). Check IDs: tabIncident/tabConfig/tabGuide + panelIncident/panelConfig/panelGuide");
+} else {
+  function activate(which){
+    const isIncident = (which === 'incident');
+    const isConfig   = (which === 'config');
+    const isGuide    = (which === 'guide');
+
+    tabIncident.classList.toggle('active', isIncident);
+    tabConfig.classList.toggle('active', isConfig);
+    tabGuide.classList.toggle('active', isGuide);
+
+    panelIncident.style.display = isIncident ? 'block' : 'none';
+    panelConfig.style.display   = isConfig ? 'block' : 'none';
+    panelGuide.style.display    = isGuide ? 'block' : 'none';
+  }
+
+  tabIncident.addEventListener('click', () => activate('incident'));
+  tabConfig.addEventListener('click',   () => activate('config'));
+  tabGuide.addEventListener('click',    () => activate('guide'));
+
+  activate('incident'); // default tab on load
+}
+
+
     // Incident
 	// ==========================================================
 // NEW: Auto-regenerate Suggested Evidence when fields change
@@ -943,6 +990,44 @@ Questions:
     const incSuggestBox = document.getElementById("incEvidenceSuggest");
     const incOfflineBox = document.getElementById("incOfflineAnalysis");
  
+    // ========== Quick Preset Buttons ==========
+    const presetText = {
+      no_internet: "Users report no internet access. They can't load websites or access cloud services.",
+      dhcp: "Devices unable to obtain IP address. Getting APIPA 169.254.x.x addresses or no IP at all.",
+      dns: "Can't resolve hostnames. Websites won't load but can ping IP addresses directly.",
+      wifi_drop: "WiFi keeps disconnecting. Users connected to WiFi but keeps dropping connection.",
+      auth_8021x: "802.1x authentication failures. Users can't authenticate to the network.",
+      m365: "Microsoft 365 / Teams / Outlook issues. Applications slow or not connecting.",
+      flap_port: "Interface flapping. Link going up and down repeatedly.",
+      slow: "Network is slow. High latency, buffering, packet loss reported."
+    };
+
+    // Attach listeners to all preset buttons
+    document.querySelectorAll('[data-preset]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const presetKey = btn.getAttribute('data-preset');
+        const text = presetText[presetKey];
+        if (!text) return;
+        
+        // Fill symptoms box
+        const symptomsBox = document.getElementById('incSymptoms');
+        symptomsBox.value = text;
+        symptomsBox.dispatchEvent(new Event('input', { bubbles: true }));
+        
+        // If auto-suggest is enabled, trigger evidence suggestions
+        const autoSuggest = document.getElementById('incAutoSuggest')?.checked;
+        if (autoSuggest) {
+          const t = document.getElementById('incType').value;
+          const symptoms = text;
+          const env = document.getElementById('incEnv').value;
+          const role = document.getElementById('incRole').value;
+          const iface = document.getElementById('incInterface').value;
+          incSuggestBox.value = evidenceSuggestions(t, symptoms, env, role, iface);
+        }
+        
+        if (typeof showToast === "function") showToast(`Loaded preset: ${presetKey}`);
+      });
+    });
     
     // Fix: Suggest Evidence Commands button wiring
     const incSuggestBtn = document.getElementById("incSuggestEvidence");
@@ -1047,28 +1132,26 @@ Questions:
  
     // Config
     const cfgOut = document.getElementById("cfgOut");
- 
     document.getElementById("cfgMakePrompt").addEventListener("click", () => {
-      cfgOut.textContent = buildConfigPrompt();
+      cfgOut.innerText = buildConfigPrompt();
     });
  
     document.getElementById("cfgMakeShell").addEventListener("click", () => {
-      cfgOut.textContent = configShell();
+      cfgOut.innerText = configShell();
     });
  
     document.getElementById("cfgCopyOut").addEventListener("click", async () => {
-      await navigator.clipboard.writeText(cfgOut.textContent);
+      await navigator.clipboard.writeText(cfgOut.innerText);
       showToast("Copied output");
     });
  
     document.getElementById("cfgDownload").addEventListener("click", () => {
-      downloadText("config_review_prompt.txt", cfgOut.textContent);
+      downloadText("config_review_prompt.txt", cfgOut.innerText);
       showToast("Downloaded config_review_prompt.txt");
     });
  
     document.getElementById("cfgClear").addEventListener("click", () => {
       ["cfgIntent","cfgText"].forEach(id => document.getElementById(id).value = "");
-      cfgOut.textContent = "(Output will appear here)";
+      cfgOut.innerText = "(Output will appear here)";
     });
   });
- 
