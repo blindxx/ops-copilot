@@ -128,12 +128,30 @@ function evidenceSuggestions(incidentType, symptomsText, envText, role, iface){
   // Prefer explicit iface; fall back to parsing from symptoms/env
   let ifc = normalizeIfc(iface) || extractIfcFromText(symptomsText) || extractIfcFromText(envText);
 
-  // Infer role if notes hint at it
-  let effectiveRole = role || "access";
-  if (/nexus|n9k|nx-?os/.test(env)) effectiveRole = "core";
-  if (/9800|wlc/.test(env)) effectiveRole = "wlc";
+    // Infer role (but NEVER clobber a real dropdown selection)
+  // If role is missing/blank, infer from incident type + symptoms + env.
+  let effectiveRole = (role || "").toLowerCase().trim();
 
-  // --- End-user friendly keyword detection ---
+  // Normalize common variants just in case something upstream passes "wireless"
+  if (effectiveRole === "wireless") effectiveRole = "wlc";
+
+  if (!effectiveRole) {
+    const all = `${incidentType || ""} ${symptomsText || ""} ${envText || ""}`.toLowerCase();
+
+    const looksWireless =
+      incidentType === "wireless" ||
+      /\bwifi\b|\bwi-fi\b|\bssid\b|\bwlan\b|\bwlc\b|catalyst\s*9800|\b9800\b|\bap\b|\baccess point\b|\b9166\b|\b9130\b/.test(all);
+
+    const looksCore =
+      /\bnexus\b|\bn9k\b|\bnx-?os\b|\bbgp\b|\bospf\b|\bhsrp\b|\bvrrp\b|\bvpc\b|\brouting\b/.test(all);
+
+    effectiveRole = looksWireless ? "wlc" : (looksCore ? "core" : "access");
+  }
+
+  // OPTIONAL: if you still want env-hints, only use them as a fallback
+  // when role was missing (already handled above). Do NOT override explicit role.
+
+	// --- End-user friendly keyword detection ---
   const hasLink = /link|down|updown|unplugged|cable|errdisable|udld|line protocol|notconnect|not connect/.test(s);
 
   // Flapping / intermittent
