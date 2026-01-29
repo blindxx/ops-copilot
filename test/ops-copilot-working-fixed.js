@@ -70,34 +70,8 @@ if (DEBUG) {
 // - Safe for sanitized data
 // - Optimized for Cat9300/9300X + Nexus9K + Catalyst 9800
 // ==========================================================
-  // ==========================================================
-// JS SECTION: TAB SWITCHING
-// ==========================================================
-document.addEventListener("DOMContentLoaded", () => {
-  const tabIncident = document.getElementById('tabIncident');
-  const tabConfig   = document.getElementById('tabConfig');
-  const tabGuide    = document.getElementById('tabGuide');
-  const panelIncident = document.getElementById('panelIncident');
-  const panelConfig   = document.getElementById('panelConfig');
-  const panelGuide    = document.getElementById('panelGuide');
- 
-  function activate(which){
-    const isIncident = (which === 'incident');
-    const isConfig = (which === 'config');
-    const isGuide = (which === 'guide');
-    
-    tabIncident.classList.toggle('active', isIncident);
-    tabConfig.classList.toggle('active', isConfig);
-    tabGuide.classList.toggle('active', isGuide);
-    
-    panelIncident.style.display = isIncident ? 'block' : 'none';
-    panelConfig.style.display   = isConfig ? 'block' : 'none';
-    panelGuide.style.display    = isGuide ? 'block' : 'none';
-  }
-  tabIncident.addEventListener('click', () => activate('incident'));
-  tabConfig.addEventListener('click', () => activate('config'));
-  tabGuide.addEventListener('click', () => activate('guide'));
-  });
+
+
  
 // ==========================================================
 // JS SECTION: HELPERS (toast, download, redaction)
@@ -909,6 +883,36 @@ Questions:
 // JS SECTION: EVENT LISTENERS / BUTTON WIRING
 // ==========================================================
   window.addEventListener("DOMContentLoaded", () => {
+	  window.addEventListener("DOMContentLoaded", () => {
+
+  // ===== TAB SWITCHING =====
+  const tabIncident = document.getElementById('tabIncident');
+  const tabConfig   = document.getElementById('tabConfig');
+  const tabGuide    = document.getElementById('tabGuide');
+  const panelIncident = document.getElementById('panelIncident');
+  const panelConfig   = document.getElementById('panelConfig');
+  const panelGuide    = document.getElementById('panelGuide');
+
+  function activate(which){
+    const isIncident = (which === 'incident');
+    const isConfig = (which === 'config');
+    const isGuide = (which === 'guide');
+
+    tabIncident.classList.toggle('active', isIncident);
+    tabConfig.classList.toggle('active', isConfig);
+    tabGuide.classList.toggle('active', isGuide);
+
+    panelIncident.style.display = isIncident ? 'block' : 'none';
+    panelConfig.style.display   = isConfig ? 'block' : 'none';
+    panelGuide.style.display    = isGuide ? 'block' : 'none';
+  }
+
+  tabIncident.addEventListener('click', () => activate('incident'));
+  tabConfig.addEventListener('click', () => activate('config'));
+  tabGuide.addEventListener('click', () => activate('guide'));
+
+  // (your other existing code continues here)
+
     // Incident
 	// ==========================================================
 // NEW: Auto-regenerate Suggested Evidence when fields change
