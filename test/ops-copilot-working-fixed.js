@@ -143,12 +143,6 @@ function evidenceSuggestions(incidentType, symptomsText, envText, role, iface){
   const sRaw = (symptomsText || "");
   const s = sRaw.toLowerCase();
   const env = (envText || "").toLowerCase();
-  // Normalize dropdown incident type (your HTML uses lowercase values)
-	const typeNorm = String(incidentType || "").toLowerCase();
-	const isWirelessType = typeNorm === "wireless";
-	const isWiredType = typeNorm === "wired" || typeNorm === "connectivity";
-	const isDhcpType = typeNorm === "dhcp";
-	const isOtherType = typeNorm === "other";
 
   // --- IP hint extractor (first IPv4 in symptoms) ---
   let ipHint = "";
@@ -470,7 +464,7 @@ function evidenceSuggestions(incidentType, symptomsText, envText, role, iface){
   out.push("");
 
   // Wired evidence: Catalyst
-	if ((isWiredType || isOtherType) && effectiveRole === "access") {
+  if ((incidentType === "Wired" || incidentType === "Other") && effectiveRole === "access") {
     out.push("=== Wired / Catalyst 9300/9300X (IOS-XE) ===");
     out.push("show interfaces | i line protocol|error|CRC|input errors|output errors");
     if (hasLink) out.push("show logging | i LINK|UPDOWN|ERRDISABLE|UDLD");
@@ -502,7 +496,7 @@ function evidenceSuggestions(incidentType, symptomsText, envText, role, iface){
   }
 
   // Wireless evidence: 9800 WLC
-	if (isWirelessType || hasWifi || effectiveRole === "wlc") {
+  if (incidentType === "Wireless" || hasWifi || effectiveRole === "wlc") {
     out.push("=== Wireless / Catalyst 9800 WLC (IOS-XE) ===");
     out.push("show ap summary");
     out.push("show ap join stats summary");
@@ -589,7 +583,7 @@ function evidenceSuggestions(incidentType, symptomsText, envText, role, iface){
   }
 
   // DHCP/DNS (with role-aware deepening)
-	if (isDhcpType || hasDhcp || hasDns) {
+  if (incidentType === "DHCP/DNS" || hasDhcp || hasDns) {
     out.push("=== DHCP / DNS evidence ===");
 
     if (hasDhcp || incidentType === "DHCP/DNS") {
@@ -869,10 +863,10 @@ function incidentShell(offlineText, suggestText, meta) {
  
   // ---------- Config prompt + shell ----------
   function buildConfigPrompt(){
-  const type = document.getElementById('cfgType')?.value || "(not provided)";
+    const type = document.getElementById('cfgType').value;
     const intent = document.getElementById('cfgIntent').value.trim() || "(not provided)";
     let cfg = document.getElementById('cfgText').value.trim() || "(not provided)";
-    const doRedact = !!document.getElementById('cfgRedact')?.checked;
+    const doRedact = document.getElementById('cfgRedact').checked;
     if(doRedact) cfg = redact(cfg);
  
     return `You are a network configuration reviewer. Review the pasted config for risk and correctness.
@@ -914,6 +908,7 @@ Questions:
   // ==========================================================
 // JS SECTION: EVENT LISTENERS / BUTTON WIRING
 // ==========================================================
+  window.addEventListener("DOMContentLoaded", () => {
     // Incident
 	// ==========================================================
 // NEW: Auto-regenerate Suggested Evidence when fields change
@@ -947,31 +942,8 @@ Questions:
     const incEvidenceBox = document.getElementById("incEvidence");
     const incSuggestBox = document.getElementById("incEvidenceSuggest");
     const incOfflineBox = document.getElementById("incOfflineAnalysis");
-	  
-	// Auto-set Role based on Incident Type (single source of truth)
-function autoSetRoleFromIncidentType() {
-  const incTypeEl = document.getElementById("incType");
-  const incRoleEl = document.getElementById("incRole");
-  if (!incTypeEl || !incRoleEl) return;
-
-  const t = String(incTypeEl.value || "").toLowerCase();
-  incRoleEl.value = (t === "wireless") ? "wlc" : "access";
-
-  // Kick existing watchers/listeners (presets/autosuggest rely on these)
-  incRoleEl.dispatchEvent(new Event("change", { bubbles: true }));
-  incRoleEl.dispatchEvent(new Event("input", { bubbles: true }));
-}
-
-// Wire it up: run once on load + whenever Incident Type changes
-(() => {
-  const incTypeEl = document.getElementById("incType");
-  if (!incTypeEl) return;
-
-  autoSetRoleFromIncidentType(); // set immediately on page load
-  incTypeEl.addEventListener("change", autoSetRoleFromIncidentType);
-})();
-
- 	// ========== Quick Preset Buttons ==========
+ 
+    // ========== Quick Preset Buttons ==========
     const presetText = {
       no_internet: "Users report no internet access. They can't load websites or access cloud services.",
       dhcp: "Devices unable to obtain IP address. Getting APIPA 169.254.x.x addresses or no IP at all.",
@@ -982,28 +954,34 @@ function autoSetRoleFromIncidentType() {
       flap_port: "Interface flapping. Link going up and down repeatedly.",
       slow: "Network is slow. High latency, buffering, packet loss reported."
     };
+
     // Attach listeners to all preset buttons
-document.querySelectorAll('[data-preset]').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const presetKey = btn.getAttribute('data-preset');
-    const text = presetText[presetKey];
-    if (!text) return;
-
-    // Fill symptoms box
-    const symptomsBox = document.getElementById('incSymptoms');
-    if (symptomsBox) symptomsBox.value = text;
-
-    // If auto-suggest is enabled, trigger Suggest Evidence button
-    const autoSuggest = document.getElementById('incAutoSuggest')?.checked;
-    if (autoSuggest) {
-      const suggestBtn = document.getElementById('incSuggestEvidence');
-      if (suggestBtn) suggestBtn.click();
-    }
-
-    showToast(`Loaded preset: ${presetKey}`);
-  });
-});
-
+    document.querySelectorAll('[data-preset]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const presetKey = btn.getAttribute('data-preset');
+        const text = presetText[presetKey];
+        if (!text) return;
+        
+        // Fill symptoms box
+        const symptomsBox = document.getElementById('incSymptoms');
+        symptomsBox.value = text;
+        symptomsBox.dispatchEvent(new Event('input', { bubbles: true }));
+        
+        // If auto-suggest is enabled, trigger evidence suggestions
+        const autoSuggest = document.getElementById('incAutoSuggest')?.checked;
+        if (autoSuggest) {
+          const t = document.getElementById('incType').value;
+          const symptoms = text;
+          const env = document.getElementById('incEnv').value;
+          const role = document.getElementById('incRole').value;
+          const iface = document.getElementById('incInterface').value;
+          incSuggestBox.value = evidenceSuggestions(t, symptoms, env, role, iface);
+        }
+        
+        if (typeof showToast === "function") showToast(`Loaded preset: ${presetKey}`);
+      });
+    });
+    
     // Fix: Suggest Evidence Commands button wiring
     const incSuggestBtn = document.getElementById("incSuggestEvidence");
     if (incSuggestBtn) {
@@ -1022,29 +1000,6 @@ document.querySelectorAll('[data-preset]').forEach(btn => {
     });
  
     document.getElementById("incMakeShell").addEventListener("click", () => {
-		  const incidentType = (document.getElementById("incType")?.value || "");
-  const impact = (document.getElementById("incImpact")?.value || "").trim();
-  const started = (document.getElementById("incStart")?.value || "").trim();
-  const roleSel = (document.getElementById("incRole")?.value || "");
-
-  const ifaceRaw = (document.getElementById("incInterface")?.value || "");
-  const symptomsText = (document.getElementById("incSymptoms")?.value || "");
-  const ifc = normalizeIfc(ifaceRaw) || extractIfcFromText(symptomsText);
-
-  const offlineText = (document.getElementById("incOfflineAnalysis")?.value || "");
-  const suggestText = (document.getElementById("incEvidenceSuggest")?.value || "");
-
-  incOut.textContent = incidentShell(offlineText, suggestText, {
-    incidentType,
-    role: roleSel,
-    ifc,
-    started,
-    impact
-  });
-
-  showToast("Output shell generated");
-});
-
   const incidentType = (document.getElementById("incType")?.value || "");
   const impact = (document.getElementById("incImpact")?.value || "").trim();
   const started = (document.getElementById("incStart")?.value || "").trim();
@@ -1130,17 +1085,15 @@ document.querySelectorAll('[data-preset]').forEach(btn => {
  
     // Config
     const cfgOut = document.getElementById("cfgOut");
- // Config Reviewer: generate prompt + output shell
-document.getElementById("cfgMakePrompt")?.addEventListener("click", () => {
-  cfgOut.textContent = buildConfigPrompt();
-  showToast("Config prompt generated");
-});
-
-document.getElementById("cfgMakeShell")?.addEventListener("click", () => {
-  cfgOut.textContent = configShell();
-  showToast("Config shell generated");
-});
-
+ 
+    document.getElementById("cfgMakePrompt").addEventListener("click", () => {
+      cfgOut.textContent = buildConfigPrompt();
+    });
+ 
+    document.getElementById("cfgMakeShell").addEventListener("click", () => {
+      cfgOut.textContent = configShell();
+    });
+ 
     document.getElementById("cfgCopyOut").addEventListener("click", async () => {
       await navigator.clipboard.writeText(cfgOut.textContent);
       showToast("Copied output");
@@ -1155,3 +1108,4 @@ document.getElementById("cfgMakeShell")?.addEventListener("click", () => {
       ["cfgIntent","cfgText"].forEach(id => document.getElementById(id).value = "");
       cfgOut.textContent = "(Output will appear here)";
     });
+  });
