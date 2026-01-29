@@ -869,7 +869,7 @@ function incidentShell(offlineText, suggestText, meta) {
  
   // ---------- Config prompt + shell ----------
   function buildConfigPrompt(){
-    const type = document.getElementById('cfgType').value;
+  const type = document.getElementById('cfgType')?.value || "(not provided)";
     const intent = document.getElementById('cfgIntent').value.trim() || "(not provided)";
     let cfg = document.getElementById('cfgText').value.trim() || "(not provided)";
     const doRedact = !!document.getElementById('cfgRedact')?.checked;
@@ -1135,7 +1135,17 @@ document.querySelectorAll('[data-preset]').forEach(btn => {
  
     // Config
     const cfgOut = document.getElementById("cfgOut");
- 
+ // Config Reviewer: generate prompt + output shell
+document.getElementById("cfgMakePrompt")?.addEventListener("click", () => {
+  cfgOut.textContent = buildConfigPrompt();
+  showToast("Config prompt generated");
+});
+
+document.getElementById("cfgMakeShell")?.addEventListener("click", () => {
+  cfgOut.textContent = configShell();
+  showToast("Config shell generated");
+});
+
     document.getElementById("cfgCopyOut").addEventListener("click", async () => {
       await navigator.clipboard.writeText(cfgOut.textContent);
       showToast("Copied output");
@@ -1151,26 +1161,3 @@ document.querySelectorAll('[data-preset]').forEach(btn => {
       cfgOut.textContent = "(Output will appear here)";
     });
   });
-
- // ================= CONFIG REVIEWER SAFE WIRING =================
-// This runs AFTER the page loads and guarantees the buttons work
-window.addEventListener("DOMContentLoaded", () => {
-  const cfgOut = document.getElementById("cfgOut");
-  const btnPrompt = document.getElementById("cfgMakePrompt");
-  const btnShell  = document.getElementById("cfgMakeShell");
-
-  if (cfgOut && btnPrompt) {
-    btnPrompt.addEventListener("click", () => {
-      cfgOut.textContent = buildConfigPrompt();
-      showToast("Config prompt generated");
-    });
-  }
-
-  if (cfgOut && btnShell) {
-    btnShell.addEventListener("click", () => {
-      cfgOut.textContent = configShell();
-      showToast("Config shell generated");
-    });
-  }
-});
-
