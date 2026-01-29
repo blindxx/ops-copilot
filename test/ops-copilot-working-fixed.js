@@ -882,7 +882,6 @@ Questions:
   // ==========================================================
 // JS SECTION: EVENT LISTENERS / BUTTON WIRING
 // ==========================================================
-  window.addEventListener("DOMContentLoaded", () => {
 	  window.addEventListener("DOMContentLoaded", () => {
 
   // ===== TAB SWITCHING =====
