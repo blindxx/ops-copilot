@@ -919,18 +919,6 @@ Questions:
 	// ==========================================================
 // NEW: Auto-regenerate Suggested Evidence when fields change
 // ==========================================================
-	function autoSetRoleFromIncidentType() {
-  const typeEl = document.getElementById("incType");
-  const roleEl = document.getElementById("incRole");
-  if (!typeEl || !roleEl) return;
-
-  const t = String(typeEl.value || "").toLowerCase();
-
-  // Map Incident Type -> Role
-  if (t === "wireless") roleEl.value = "wlc";
-  else if (t === "dhcp") roleEl.value = "access"; // usually starts at access; adjust if your core does DHCP
-  else if (t === "wired" || t === "connectivity" || t === "performance" || t === "intermittent" || t === "other") roleEl.value = "access";
-}
 	function refreshEvidenceSuggestions(){
 	const auto = document.getElementById("incAutoSuggest")?.checked;
 	if (!auto) return;
@@ -1035,20 +1023,28 @@ document.querySelectorAll('[data-preset]').forEach(btn => {
     });
  
     document.getElementById("incMakeShell").addEventListener("click", () => {
-	
+		  const incidentType = (document.getElementById("incType")?.value || "");
+  const impact = (document.getElementById("incImpact")?.value || "").trim();
+  const started = (document.getElementById("incStart")?.value || "").trim();
+  const roleSel = (document.getElementById("incRole")?.value || "");
 
-  btnShell.addEventListener("click", () => {
-    const cfg = (cfgTextEl.value || "").trim();
+  const ifaceRaw = (document.getElementById("incInterface")?.value || "");
+  const symptomsText = (document.getElementById("incSymptoms")?.value || "");
+  const ifc = normalizeIfc(ifaceRaw) || extractIfcFromText(symptomsText);
 
-    if (!cfg) {
-      setCfgOut("Config Reviewer: No config pasted in #cfgText.");
-      return;
-    }
+  const offlineText = (document.getElementById("incOfflineAnalysis")?.value || "");
+  const suggestText = (document.getElementById("incEvidenceSuggest")?.value || "");
 
-    setCfgOut(buildShellFromConfig(cfg));
-    showToast("Config Reviewer shell generated");
+  incOut.textContent = incidentShell(offlineText, suggestText, {
+    incidentType,
+    role: roleSel,
+    ifc,
+    started,
+    impact
   });
-})();
+
+  showToast("Output shell generated");
+});
 
   const incidentType = (document.getElementById("incType")?.value || "");
   const impact = (document.getElementById("incImpact")?.value || "").trim();
