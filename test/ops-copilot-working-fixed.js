@@ -901,6 +901,26 @@ Questions:
 // JS SECTION: EVENT LISTENERS / BUTTON WIRING
 // ==========================================================
 	  window.addEventListener("DOMContentLoaded", () => {
+  // ===== AUTO ROLE FROM INCIDENT TYPE (FIX) =====
+  const incTypeEl = document.getElementById("incType");
+  const incRoleEl = document.getElementById("incRole");
+
+  function autoSetRoleFromIncidentType() {
+    if (!incTypeEl || !incRoleEl) return;
+
+    const t = String(incTypeEl.value || "").toLowerCase().trim();
+
+    // Map Incident Type -> Role
+    // (adjust these if your dropdown uses slightly different labels)
+    if (t === "wireless") incRoleEl.value = "wlc";
+    else if (t === "wan/isp") incRoleEl.value = "core";
+    else if (t === "dhcp/dns" || t === "dhcp") incRoleEl.value = "access";
+    else incRoleEl.value = "access";
+  }
+
+  // Run once on load + every time incident type changes
+  autoSetRoleFromIncidentType();
+  if (incTypeEl) incTypeEl.addEventListener("change", autoSetRoleFromIncidentType);
 
  // ===== TAB SWITCHING (SAFE) =====
 const tabIncident   = document.getElementById('tabIncident');
