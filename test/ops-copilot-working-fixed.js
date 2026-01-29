@@ -872,7 +872,7 @@ function incidentShell(offlineText, suggestText, meta) {
     const type = document.getElementById('cfgType').value;
     const intent = document.getElementById('cfgIntent').value.trim() || "(not provided)";
     let cfg = document.getElementById('cfgText').value.trim() || "(not provided)";
-    const doRedact = document.getElementById('cfgRedact').checked;
+    const doRedact = !!document.getElementById('cfgRedact')?.checked;
     if(doRedact) cfg = redact(cfg);
  
     return `You are a network configuration reviewer. Review the pasted config for risk and correctness.
@@ -1035,106 +1035,7 @@ document.querySelectorAll('[data-preset]').forEach(btn => {
     });
  
     document.getElementById("incMakeShell").addEventListener("click", () => {
-		// ===== Config Reviewer: prompt + shell generators (wired to cfg* IDs) =====
-(function wireConfigReviewer() {
-  const cfgTextEl   = document.getElementById("cfgText");
-  const cfgIntentEl = document.getElementById("cfgIntent");
-  const cfgOutEl    = document.getElementById("cfgOut");
-
-  const btnPrompt = document.getElementById("cfgMakePrompt");
-  const btnShell  = document.getElementById("cfgMakeShell");
-
-  if (!cfgTextEl || !cfgOutEl || !btnPrompt || !btnShell) return;
-
-  function setCfgOut(text) {
-    cfgOutEl.textContent = text || "";
-  }
-
-  function parseInterfaceName(cfg) {
-    const m = cfg.match(/^\s*interface\s+([A-Za-z]+[\w/.\-]+)\s*$/mi);
-    return m ? m[1].trim() : "";
-  }
-
-  function buildConfigReviewPrompt(intent, cfg) {
-    return [
-      "You are a senior network engineer reviewing a SANITIZED config snippet.",
-      "",
-      "Task:",
-      "1) Identify risks, misconfigurations, and missing best practices.",
-      "2) Explain impact in plain English.",
-      "3) Provide specific recommended changes (exact CLI) when possible.",
-      "4) Provide a short verification checklist (show commands).",
-      "",
-      "Context / Intended Purpose:",
-      intent || "(not provided)",
-      "",
-      "Config Snippet (sanitized):",
-      "```",
-      cfg,
-      "```"
-    ].join("\n");
-  }
-
-  function buildShellFromConfig(cfg) {
-    const ifc = parseInterfaceName(cfg);
-    const lines = [];
-
-    // Always-useful baselines
-    lines.push("show version");
-    lines.push("show running-config | i ^hostname|^ip domain-name|^no ip domain-lookup");
-    lines.push("show logging last 50");
-
-    // Interface-focused (best effort)
-    if (ifc) {
-      lines.push("");
-      lines.push(`! === Interface focus: ${ifc} ===`);
-      lines.push(`show run interface ${ifc}`);
-      lines.push(`show interface ${ifc}`);
-      lines.push(`show interface ${ifc} status`);
-      lines.push(`show interface ${ifc} switchport`);
-      lines.push(`show spanning-tree interface ${ifc} detail`);
-
-      // Heuristics: add targeted checks if config hints at features
-      if (/switchport\s+mode\s+trunk/i.test(cfg) || /switchport\s+trunk/i.test(cfg)) {
-        lines.push(`show interface trunk`);
-        lines.push(`show spanning-tree vlan 1-4094 | i ${ifc.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`);
-      }
-
-      if (/port-security/i.test(cfg)) {
-        lines.push(`show port-security interface ${ifc}`);
-      }
-
-      if (/authentication\s+port-control|dot1x|mab/i.test(cfg)) {
-        lines.push(`show authentication sessions interface ${ifc} details`);
-      }
-
-      if (/ip\s+access-group/i.test(cfg)) {
-        lines.push(`show access-lists`);
-      }
-
-      if (/shutdown/i.test(cfg)) {
-        lines.push(`show interface status | i ${ifc}`);
-      }
-    } else {
-      lines.push("");
-      lines.push("! (No 'interface X' line detected in pasted config. Paste an interface stanza for interface-specific commands.)");
-    }
-
-    return lines.join("\n");
-  }
-
-  btnPrompt.addEventListener("click", () => {
-    const cfg = (cfgTextEl.value || "").trim();
-    const intent = (cfgIntentEl?.value || "").trim();
-
-    if (!cfg) {
-      setCfgOut("Config Reviewer: No config pasted in #cfgText.");
-      return;
-    }
-
-    setCfgOut(buildConfigReviewPrompt(intent, cfg));
-    showToast("Config Reviewer prompt generated");
-  });
+	
 
   btnShell.addEventListener("click", () => {
     const cfg = (cfgTextEl.value || "").trim();
@@ -1250,4 +1151,26 @@ document.querySelectorAll('[data-preset]').forEach(btn => {
       cfgOut.textContent = "(Output will appear here)";
     });
   });
- 
+
+ // ================= CONFIG REVIEWER SAFE WIRING =================
+// This runs AFTER the page loads and guarantees the buttons work
+window.addEventListener("DOMContentLoaded", () => {
+  const cfgOut = document.getElementById("cfgOut");
+  const btnPrompt = document.getElementById("cfgMakePrompt");
+  const btnShell  = document.getElementById("cfgMakeShell");
+
+  if (cfgOut && btnPrompt) {
+    btnPrompt.addEventListener("click", () => {
+      cfgOut.textContent = buildConfigPrompt();
+      showToast("Config prompt generated");
+    });
+  }
+
+  if (cfgOut && btnShell) {
+    btnShell.addEventListener("click", () => {
+      cfgOut.textContent = configShell();
+      showToast("Config shell generated");
+    });
+  }
+});
+
