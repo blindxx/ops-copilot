@@ -1094,7 +1094,7 @@ if (!tabIncident || !tabConfig || !tabGuide || !panelIncident || !panelConfig ||
  
     // Config
     const cfgOut = document.getElementById("cfgOut");
- 
+ 	console.log("CFG OUT TAG:", cfgOut ? cfgOut.tagName : "MISSING");
     document.getElementById("cfgMakePrompt").addEventListener("click", () => {
       cfgOut.textContent = buildConfigPrompt();
     });
