@@ -1096,25 +1096,25 @@ if (!tabIncident || !tabConfig || !tabGuide || !panelIncident || !panelConfig ||
     const cfgOut = document.getElementById("cfgOut");
  	console.log("CFG OUT TAG:", cfgOut ? cfgOut.tagName : "MISSING");
     document.getElementById("cfgMakePrompt").addEventListener("click", () => {
-      cfgOut.textContent = buildConfigPrompt();
+      cfgOut.innerText = buildConfigPrompt();
     });
  
     document.getElementById("cfgMakeShell").addEventListener("click", () => {
-      cfgOut.textContent = configShell();
+      cfgOut.innerText = configShell();
     });
  
     document.getElementById("cfgCopyOut").addEventListener("click", async () => {
-      await navigator.clipboard.writeText(cfgOut.textContent);
+      await navigator.clipboard.writeText(cfgOut.innerText);
       showToast("Copied output");
     });
  
     document.getElementById("cfgDownload").addEventListener("click", () => {
-      downloadText("config_review_prompt.txt", cfgOut.textContent);
+      downloadText("config_review_prompt.txt", cfgOut.innerText);
       showToast("Downloaded config_review_prompt.txt");
     });
  
     document.getElementById("cfgClear").addEventListener("click", () => {
       ["cfgIntent","cfgText"].forEach(id => document.getElementById(id).value = "");
-      cfgOut.textContent = "(Output will appear here)";
+      cfgOut.innerText = "(Output will appear here)";
     });
   });
