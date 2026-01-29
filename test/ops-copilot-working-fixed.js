@@ -884,18 +884,22 @@ Questions:
 // ==========================================================
 	  window.addEventListener("DOMContentLoaded", () => {
 
-  // ===== TAB SWITCHING =====
-  const tabIncident = document.getElementById('tabIncident');
-  const tabConfig   = document.getElementById('tabConfig');
-  const tabGuide    = document.getElementById('tabGuide');
-  const panelIncident = document.getElementById('panelIncident');
-  const panelConfig   = document.getElementById('panelConfig');
-  const panelGuide    = document.getElementById('panelGuide');
+ // ===== TAB SWITCHING (SAFE) =====
+const tabIncident   = document.getElementById('tabIncident');
+const tabConfig     = document.getElementById('tabConfig');
+const tabGuide      = document.getElementById('tabGuide');
+const panelIncident = document.getElementById('panelIncident');
+const panelConfig   = document.getElementById('panelConfig');
+const panelGuide    = document.getElementById('panelGuide');
 
+// STOP if any tab element is missing (prevents random breakage)
+if (!tabIncident || !tabConfig || !tabGuide || !panelIncident || !panelConfig || !panelGuide) {
+  console.warn("Tabs: missing element(s). Check IDs: tabIncident/tabConfig/tabGuide + panelIncident/panelConfig/panelGuide");
+} else {
   function activate(which){
     const isIncident = (which === 'incident');
-    const isConfig = (which === 'config');
-    const isGuide = (which === 'guide');
+    const isConfig   = (which === 'config');
+    const isGuide    = (which === 'guide');
 
     tabIncident.classList.toggle('active', isIncident);
     tabConfig.classList.toggle('active', isConfig);
@@ -907,10 +911,12 @@ Questions:
   }
 
   tabIncident.addEventListener('click', () => activate('incident'));
-  tabConfig.addEventListener('click', () => activate('config'));
-  tabGuide.addEventListener('click', () => activate('guide'));
+  tabConfig.addEventListener('click',   () => activate('config'));
+  tabGuide.addEventListener('click',    () => activate('guide'));
 
-  // (your other existing code continues here)
+  activate('incident'); // default tab on load
+}
+
 
     // Incident
 	// ==========================================================
