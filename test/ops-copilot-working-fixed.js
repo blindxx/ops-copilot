@@ -914,7 +914,6 @@ Questions:
   // ==========================================================
 // JS SECTION: EVENT LISTENERS / BUTTON WIRING
 // ==========================================================
-  window.addEventListener("DOMContentLoaded", () => {
     // Incident
 	// ==========================================================
 // NEW: Auto-regenerate Suggested Evidence when fields change
@@ -1156,4 +1155,3 @@ document.getElementById("cfgMakeShell")?.addEventListener("click", () => {
       ["cfgIntent","cfgText"].forEach(id => document.getElementById(id).value = "");
       cfgOut.textContent = "(Output will appear here)";
     });
-  });
