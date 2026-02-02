@@ -267,7 +267,7 @@
       <p>Network Troubleshooting Assistant - Optimized for Cat9300/9300X, Nexus9K & Catalyst 9800</p>
       <p style="font-size: 0.9em; margin-top: 10px; opacity: 0.9;">Need help? See the Guide tab →</p>
       <p style="font-size: 0.85em; margin-top: 8px; opacity: 0.9;">
-  Version: v2.0 • 2026-01-29
+  Version: v2.1 • 2026-01-29
 </p>
 
     </header>
@@ -332,6 +332,21 @@
       <div class="form-group">
         <label for="incSymptoms">Symptoms/User Reports</label>
         <textarea id="incSymptoms" placeholder="e.g., Users report 'no internet', can't load websites, Teams calls dropping"></textarea>
+      </div>
+      
+      <!-- Quick Preset Buttons -->
+      <div class="form-group">
+        <label>Quick Presets (auto-fill symptoms)</label>
+        <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px;">
+          <button type="button" class="btn-secondary" data-preset="no_internet" style="flex: 1 1 auto; min-width: 140px;">🌐 No Internet</button>
+          <button type="button" class="btn-secondary" data-preset="dhcp" style="flex: 1 1 auto; min-width: 140px;">📡 DHCP Issues</button>
+          <button type="button" class="btn-secondary" data-preset="dns" style="flex: 1 1 auto; min-width: 140px;">🔍 DNS Issues</button>
+          <button type="button" class="btn-secondary" data-preset="wifi_drop" style="flex: 1 1 auto; min-width: 140px;">📶 WiFi Dropping</button>
+          <button type="button" class="btn-secondary" data-preset="auth_8021x" style="flex: 1 1 auto; min-width: 140px;">🔐 802.1X Auth</button>
+          <button type="button" class="btn-secondary" data-preset="m365" style="flex: 1 1 auto; min-width: 140px;">💼 M365/Teams</button>
+          <button type="button" class="btn-secondary" data-preset="flap_port" style="flex: 1 1 auto; min-width: 140px;">⚡ Port Flapping</button>
+          <button type="button" class="btn-secondary" data-preset="slow" style="flex: 1 1 auto; min-width: 140px;">🐌 Slow/Latency</button>
+        </div>
       </div>
       
       <div class="button-group">
@@ -691,6 +706,6 @@
   
   <div id="toast"></div>
   
-  <script src="./ops-copilot-working-fixed.js?v=20260127a"></script>
+  <script src="./ops-copilot-working-fixed.js?v=20260129"></script>
 </body>
 </html>
