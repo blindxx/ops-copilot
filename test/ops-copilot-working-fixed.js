@@ -117,6 +117,8 @@ function evidenceSuggestions(incidentType, symptomsText, envText, role, iface){
   const sRaw = (symptomsText || "");
   const s = sRaw.toLowerCase();
   const env = (envText || "").toLowerCase();
+  const type = String(incidentType || "").toLowerCase().trim();
+
 
   // --- IP hint extractor (first IPv4 in symptoms) ---
   let ipHint = "";
@@ -137,14 +139,11 @@ function evidenceSuggestions(incidentType, symptomsText, envText, role, iface){
 
   if (!effectiveRole) {
     const all = `${incidentType || ""} ${symptomsText || ""} ${envText || ""}`.toLowerCase();
-
     const looksWireless =
-      incidentType === "wireless" ||
+  	  type === "wireless" ||
       /\bwifi\b|\bwi-fi\b|\bssid\b|\bwlan\b|\bwlc\b|catalyst\s*9800|\b9800\b|\bap\b|\baccess point\b|\b9166\b|\b9130\b/.test(all);
-
-    const looksCore =
+     const looksCore =
       /\bnexus\b|\bn9k\b|\bnx-?os\b|\bbgp\b|\bospf\b|\bhsrp\b|\bvrrp\b|\bvpc\b|\brouting\b/.test(all);
-
     effectiveRole = looksWireless ? "wlc" : (looksCore ? "core" : "access");
   }
 
