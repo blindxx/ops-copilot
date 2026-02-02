@@ -141,7 +141,8 @@ function evidenceSuggestions(incidentType, symptomsText, envText, role, iface){
     const all = `${incidentType || ""} ${symptomsText || ""} ${envText || ""}`.toLowerCase();
     const looksWireless =
   	  type === "wireless" ||
-      /\bwifi\b|\bwi-fi\b|\bssid\b|\bwlan\b|\bwlc\b|catalyst\s*9800|\b9800\b|\bap\b|\baccess point\b|\b9166\b|\b9130\b/.test(all);
+	  /\bwifi\b|\bwi-fi\b|\bssid\b|\bwlan\b|\bwlc\b|catalyst\s*9800|\b9800\b|\bap\b|\baccess point\b|\b9166\b|\b9130\b|\bcapwap\b|\bdtls\b|\bdeauth\b|\bdisassoc\b/.test(all);
+
      const looksCore =
       /\bnexus\b|\bn9k\b|\bnx-?os\b|\bbgp\b|\bospf\b|\bhsrp\b|\bvrrp\b|\bvpc\b|\brouting\b/.test(all);
     effectiveRole = looksWireless ? "wlc" : (looksCore ? "core" : "access");
