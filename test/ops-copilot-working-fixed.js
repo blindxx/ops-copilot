@@ -1025,6 +1025,105 @@ if (!tabIncident || !tabConfig || !tabGuide || !panelIncident || !panelConfig ||
   el.addEventListener("change", refreshEvidenceSuggestions);
   el.addEventListener("paste", () => setTimeout(refreshEvidenceSuggestions, 0));
 });
+
+// ==========================================================
+// AUTO ROLE + INCIDENT TYPE SYNC (Symptoms/Env/Role/Type)
+// Paste directly under refreshEvidenceSuggestions()
+// ==========================================================
+
+let incRoleWasManuallySet = false;
+
+function inferRoleFromInputs() {
+  const typeEl = document.getElementById("incType");
+  const roleEl = document.getElementById("incRole");
+  const symptomsEl = document.getElementById("incSymptoms");
+  const envEl = document.getElementById("incEnv");
+  if (!typeEl || !roleEl) return null;
+
+  const all = `${typeEl.value || ""} ${(symptomsEl?.value || "")} ${(envEl?.value || "")}`.toLowerCase();
+
+  const looksWireless =
+    /\bwifi\b|\bwi-fi\b|\bwireless\b|\bssid\b|\bwlan\b|\bwlc\b|catalyst\s*9800|\b9800\b|\bap\b|\baccess point\b|\b9166\b|\b9130\b/.test(all);
+
+  const looksCore =
+    /\bnexus\b|\bn9k\b|\bnx-?os\b|\bbgp\b|\bospf\b|\bhsrp\b|\bvrrp\b|\bvpc\b|\brouting\b/.test(all);
+
+  const inferredRole = looksWireless ? "wlc" : (looksCore ? "core" : "access");
+  return { inferredRole, looksWireless, looksCore };
+}
+
+function syncRoleAndTypeFromInputs({ forceRole = false } = {}) {
+  const typeEl = document.getElementById("incType");
+  const roleEl = document.getElementById("incRole");
+  if (!typeEl || !roleEl) return;
+
+  const inf = inferRoleFromInputs();
+  if (!inf) return;
+
+  // 1) Symptoms/env/type can update ROLE (unless user manually set role)
+  if (forceRole || !incRoleWasManuallySet) {
+    if (roleEl.value !== inf.inferredRole) {
+      roleEl.value = inf.inferredRole;
+    }
+  }
+
+  // 2) ROLE/Wireless detection should also keep INCIDENT TYPE aligned
+  // (Only force "Wireless" when it really looks wireless)
+  if (inf.looksWireless && typeEl.value !== "Wireless") {
+    typeEl.value = "Wireless";
+  }
+
+  // If user moves away from wireless signals, don't aggressively flip their type.
+  // But if they set role away from wlc, we handle that in the role dropdown listener below.
+}
+
+// --- Wire listeners (one-time) ---
+(function wireAutoRoleSync(){
+  const typeEl = document.getElementById("incType");
+  const roleEl = document.getElementById("incRole");
+  const symptomsEl = document.getElementById("incSymptoms");
+  const envEl = document.getElementById("incEnv");
+
+  if (!typeEl || !roleEl) return;
+
+  // Incident Type dropdown change -> force role sync + allow auto again
+  typeEl.addEventListener("change", () => {
+    incRoleWasManuallySet = false;
+    // Keep your existing mapping behavior:
+    if (typeof autoSetRoleFromIncidentType === "function") autoSetRoleFromIncidentType();
+    // Also sync based on text (stronger)
+    syncRoleAndTypeFromInputs({ forceRole: true });
+    refreshEvidenceSuggestions();
+  });
+
+  // Role dropdown change -> mark manual + sync Incident Type to match role
+  roleEl.addEventListener("change", () => {
+    incRoleWasManuallySet = true;
+
+    if (roleEl.value === "wlc" && typeEl.value !== "Wireless") typeEl.value = "Wireless";
+    if (roleEl.value !== "wlc" && typeEl.value === "Wireless") typeEl.value = "Wired";
+
+    refreshEvidenceSuggestions();
+  });
+
+  // Symptoms/env typing -> auto-update role (unless manually overridden) + keep type aligned if wireless
+  [symptomsEl, envEl].forEach(el => {
+    if (!el) return;
+    el.addEventListener("input", () => {
+      syncRoleAndTypeFromInputs();
+      refreshEvidenceSuggestions();
+    });
+    el.addEventListener("change", () => {
+      syncRoleAndTypeFromInputs();
+      refreshEvidenceSuggestions();
+    });
+    el.addEventListener("paste", () => setTimeout(() => {
+      syncRoleAndTypeFromInputs();
+      refreshEvidenceSuggestions();
+    }, 0));
+  });
+})();
+		  
     const incOut = document.getElementById("incOut");
     const incEvidenceBox = document.getElementById("incEvidence");
     const incSuggestBox = document.getElementById("incEvidenceSuggest");
