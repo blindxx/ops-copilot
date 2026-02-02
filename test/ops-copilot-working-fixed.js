@@ -757,6 +757,46 @@ function evidenceSuggestions(incidentType, symptomsText, envText, role, iface){
  
     return `OFFLINE TRIAGE (rule-based)\n\n1) Likely causes (ranked)\n${top5}\n\n2) Next checks (top 10)\n${top10}\n\n3) Teams update (draft)\n${update}\n\nNote: Offline triage is heuristic. For higher confidence, use approved AI with the generated prompt.`;
   }
+
+// ==========================================================
+// AUTO ROLE DETECTION (Type + Symptoms)
+// ==========================================================
+
+function autoSetRoleFromIncidentType() {
+  const typeEl = document.getElementById("incType");
+  const roleEl = document.getElementById("incRole");
+  if (!typeEl || !roleEl) return;
+
+  const t = String(typeEl.value || "").toLowerCase();
+
+  if (t.includes("wireless") || t.includes("wifi") || t.includes("wi-fi")) roleEl.value = "wlc";
+  else if (t.includes("core") || t.includes("routing") || t.includes("wan") || t.includes("isp")) roleEl.value = "core";
+  else roleEl.value = "access";
+}
+
+function detectRoleFromSymptoms(symptomsText, envText) {
+  const s = (symptomsText || "").toLowerCase();
+  const env = (envText || "").toLowerCase();
+  const combined = s + " " + env;
+
+  if (/wifi|wi-fi|wireless|ssid|ap\b|roam|rssi|deauth|disassoc|capwap|dtls|wlc|9800/.test(combined)) return "wlc";
+  if (/bgp|ospf|eigrp|hsrp|vrrp|route|routing|vrf|nexus|n9k|nx-os/.test(combined)) return "core";
+  return "access";
+}
+
+function autoSetRoleFromTextIfEnabled() {
+  const roleEl = document.getElementById("incRole");
+  const symptomsEl = document.getElementById("incSymptoms");
+  const envEl = document.getElementById("incEnv");
+  if (!roleEl || !symptomsEl) return;
+
+  // Only auto-change if still default role
+  if (roleEl.value !== "access") return;
+
+  const suggested = detectRoleFromSymptoms(symptomsEl.value, envEl ? envEl.value : "");
+  roleEl.value = suggested;
+}
+
 // ==========================================================
 // JS SECTION: PROMPT BUILDERS (incident + config)
 // ==========================================================
@@ -1042,6 +1082,10 @@ if (!tabIncident || !tabConfig || !tabGuide || !panelIncident || !panelConfig ||
         showToast("Suggested evidence updated");
       });
     }
+	// Auto role switching
+	document.getElementById("incType")?.addEventListener("change", autoSetRoleFromIncidentType);
+	document.getElementById("incSymptoms")?.addEventListener("input", autoSetRoleFromTextIfEnabled);
+	document.getElementById("incEnv")?.addEventListener("input", autoSetRoleFromTextIfEnabled);
 	document.getElementById("incMakePrompt").addEventListener("click", () => {
       incOut.textContent = buildIncidentPrompt();
     });
