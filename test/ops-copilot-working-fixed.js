@@ -1069,8 +1069,8 @@ function syncRoleAndTypeFromInputs({ forceRole = false } = {}) {
 
   // 2) ROLE/Wireless detection should also keep INCIDENT TYPE aligned
   // (Only force "Wireless" when it really looks wireless)
-  if (inf.looksWireless && typeEl.value !== "Wireless") {
-    typeEl.value = "Wireless";
+  if (inf.looksWireless && typeEl.value !== "wireless") {
+	typeEl.value = "wireless";
   }
 
   // If user moves away from wireless signals, don't aggressively flip their type.
@@ -1100,8 +1100,8 @@ function syncRoleAndTypeFromInputs({ forceRole = false } = {}) {
   roleEl.addEventListener("change", () => {
     incRoleWasManuallySet = true;
 
-    if (roleEl.value === "wlc" && typeEl.value !== "Wireless") typeEl.value = "Wireless";
-    if (roleEl.value !== "wlc" && typeEl.value === "Wireless") typeEl.value = "Wired";
+    if (roleEl.value === "wlc" && typeEl.value !== "wireless") typeEl.value = "wireless";
+    if (roleEl.value !== "wlc" && typeEl.value === "wireless") typeEl.value = "wired";
 
     refreshEvidenceSuggestions();
   });
