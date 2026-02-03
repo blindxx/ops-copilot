@@ -120,7 +120,7 @@ function evidenceSuggestions(incidentType, symptomsText, envText, role, iface){
   const type = String(incidentType || "").toLowerCase().trim();
 
 
-  // --- IP hint extractor (first IPv4 in symptoms) ---
+  // --- IP hint extractor (first IPv4 in symptoms) --
   let ipHint = "";
   {
     const m = s.match(/\b(?:(?:25[0-5]|2[0-4]\d|1?\d?\d)\.){3}(?:25[0-5]|2[0-4]\d|1?\d?\d)\b/);
