@@ -89,7 +89,7 @@ if (DEBUG) {
   setTimeout(() => toast.style.display = 'none', 1100);
 }
  
-  // ---------- Download helper ----------
+  // ---------- Download helper ---------
   function downloadText(filename, text) {
     const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
     const url = URL.createObjectURL(blob);
